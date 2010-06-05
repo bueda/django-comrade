@@ -1,0 +1,4 @@
+build/
+*.pyc
+MANIFEST
+limitedregistration.egg-info/

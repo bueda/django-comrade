@@ -1,0 +1,7 @@
+========================
+Django Comrade
+========================
+
+This package contains elements common to all of Bueda's Django
+projects. Some things may be very Bueda-specific, but hey --
+suck it up, comrade.
