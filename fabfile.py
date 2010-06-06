@@ -13,4 +13,4 @@ env.upload_to_s3 = True
  
 @runs_once
 def test(dir=None):
-    _test(_nose_test)
+    _test(_nose_test, dir)
