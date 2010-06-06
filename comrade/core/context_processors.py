@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from settings import DeploymentType
 
-def context_processor(request):
+def default(request):
     context = {}
     context['DEPLOYMENT'] = settings.DEPLOYMENT
     context['site'] = Site.objects.get_current()
