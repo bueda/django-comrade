@@ -1,12 +1,27 @@
 import logging, logging.handlers
 import types
 
-from django.conf import settings
+try:
+    from django.conf import settings
+except ImportError, e:
+    import os
+    settings_module = os.environ['SETTINGS_MODULE']
+    settings = __import__(settings_module)
 
-import commonware.log
 import dictconfig
 
-class UTF8SafeFormatter(commonware.log.Formatter):
+# Pulled from commonware.log we don't have to import that, which drags with
+# it Django dependencies.
+class RemoteAddressFormatter(logging.Formatter):
+    """Formatter that makes sure REMOTE_ADDR is available."""
+
+    def format(self, record):
+        if ('%(REMOTE_ADDR)' in self._fmt
+            and 'REMOTE_ADDR' not in record.__dict__):
+            record.__dict__['REMOTE_ADDR'] = None
+        return logging.Formatter.format(self, record)
+
+class UTF8SafeFormatter(RemoteAddressFormatter):
   def __init__(self, fmt=None, datefmt=None, encoding='utf-8'):
     logging.Formatter.__init__(self, fmt, datefmt)
     self.encoding = encoding
@@ -18,7 +33,7 @@ class UTF8SafeFormatter(commonware.log.Formatter):
     return r
  
   def format(self, record):
-    t = commonware.log.Formatter.format(self, record)
+    t = RemoteAddressFormatter.format(self, record)
     if type(t) in [types.UnicodeType]:
       t = t.encode(self.encoding, 'replace')
     return t
