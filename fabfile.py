@@ -3,20 +3,17 @@ import os
 from fabric.api import *
 from fabric.contrib.console import confirm
 
-from fab_shared import (_development as development, _production as production,
-        _clone, _localhost as localhost, _make_release, _nose_test,
+from fab_shared import (_clone, _make_release, _nose_test,
         _conditional_upload_to_s3, TIME_NOW)
 
 env.unit = "comrade"
-env.scm = "git@github.com:bueda/django-comrade" env
+env.scm = "git@github.com:bueda/django-comrade" % env
 env.root_dir = os.path.abspath(os.path.dirname(__file__))
-env.path = ''
  
 def deploy(release=None):
     """
     Deploy a specific commit, tag or HEAD to all servers and/or S3.
     """
-    require('hosts', provided_by = [development, production])
     require('unit')
 
     env.scratch_path = '/tmp/%s-%s' % (env.unit, TIME_NOW)
@@ -37,5 +34,4 @@ def test(dir=None):
         dir = env.root_dir
     with settings(root_dir=dir):
         local('python setup.py build', capture=False)
-        local('python setup.py build_ext --inplace', capture=False)
         return _nose_test()
