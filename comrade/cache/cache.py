@@ -55,10 +55,14 @@ def has_key(key):
         logger.debug('%s is not cached' % key)
     return exists
 
-def incr(key, delta=1):
+def incr(key, delta=1, start=0):
     key = urlquote(key)
     logger.debug('Incremeting %s by %d' % (key, delta))
-    return cache.incr(key, delta)
+    if not cache.has_key(key):
+        cache.set(key, start + delta)
+        return start + delta
+    else:
+        return cache.incr(key, delta)
 
 def decr(key, delta=1):
     key = urlquote(key)
