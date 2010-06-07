@@ -1,4 +1,5 @@
 import logging, logging.handlers
+import os.path
 import types
 
 try:
@@ -65,12 +66,6 @@ cfg = {
             '()': logging.StreamHandler,
             'formatter': 'debug',
         },
-        'syslog': {
-            '()': logging.handlers.SysLogHandler,
-            'facility': logging.handlers.SysLogHandler.LOG_LOCAL0,
-            'address': '/dev/log',
-            'formatter': 'prod',
-        },
         'null': {
             '()': NullHandler,
         },
@@ -79,6 +74,14 @@ cfg = {
     },
     'root': {},
 }
+
+if os.path.exists('/dev/log'):
+    cfg['handlers']['syslog'] = {
+        '()': logging.handlers.SysLogHandler,
+        'facility': logging.handlers.SysLogHandler.LOG_LOCAL0,
+        'address': '/dev/log',
+        'formatter': 'prod',
+    }
 
 for key, value in settings.LOGGING.items():
     cfg[key].update(value)
