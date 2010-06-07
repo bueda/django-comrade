@@ -11,8 +11,8 @@ with urlquote.
 from django.core.cache import cache
 from django.utils.http import urlquote
 
-import commonware.log
-logger = commonware.log.getLogger('comrade.cache')
+import logging
+logger = logging.getLogger('comrade.cache')
 
 def add(key, value, timeout=None):
     key = urlquote(key)

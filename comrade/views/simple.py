@@ -2,8 +2,8 @@ from django.http import HttpResponse, HttpResponseServerError
 from django.template import Context, loader
 from django.conf import settings
 
-import commonware.log
-logger = commonware.log.getLogger('comrade.views.simple')
+import logging
+logger = logging.getLogger('comrade.views.simple')
 
 def status(request):
     logger.info("Responding to status check")
