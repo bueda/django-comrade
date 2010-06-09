@@ -14,8 +14,10 @@ from django.utils.http import urlquote
 import logging
 logger = logging.getLogger('comrade.cache')
 
+MAX_KEY_LENGTH = 250
+
 def add(key, value, timeout=None):
-    key = urlquote(key)
+    key = urlquote(key)[:MAX_KEY_LENGTH]
     logger.debug('Adding %s => %s with timeout %d'
             % (key, value, timeout))
     existed = cache.add(key, value, timeout)
@@ -26,7 +28,7 @@ def add(key, value, timeout=None):
     return existed
 
 def get(key, default=None):
-    key = urlquote(key)
+    key = urlquote(key)[:MAX_KEY_LENGTH]
     logger.debug('Getting %s' % key)
     value = cache.get(key, default)
     if value:
@@ -36,17 +38,17 @@ def get(key, default=None):
     return value
 
 def set(key, value, timeout=None):
-    key = urlquote(key)
+    key = urlquote(key)[:MAX_KEY_LENGTH]
     logger.debug('Setting %s => %s' % (key, value))
     cache.set(key, value, timeout)
 
 def delete(key):
-    key = urlquote(key)
+    key = urlquote(key)[:MAX_KEY_LENGTH]
     logger.debug('Deleting %s' % key)
     cache.delete(key)
 
 def has_key(key):
-    key = urlquote(key)
+    key = urlquote(key)[:MAX_KEY_LENGTH]
     logger.debug('Looking for %s' % key)
     exists = cache.has_key(key)
     if exists:
@@ -56,7 +58,7 @@ def has_key(key):
     return exists
 
 def incr(key, delta=1, start=0):
-    key = urlquote(key)
+    key = urlquote(key)[:MAX_KEY_LENGTH]
     logger.debug('Incremeting %s by %d' % (key, delta))
     if not cache.has_key(key):
         cache.set(key, start + delta)
@@ -65,6 +67,6 @@ def incr(key, delta=1, start=0):
         return cache.incr(key, delta)
 
 def decr(key, delta=1):
-    key = urlquote(key)
+    key = urlquote(key)[:MAX_KEY_LENGTH]
     logger.debug('Decrementing %s by %d' % (key, delta))
     return cache.decr(key, delta)
