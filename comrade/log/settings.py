@@ -6,10 +6,10 @@ try:
     from django.conf import settings
 except ImportError, e:
     import os
-    settings_module = os.environ['SETTINGS_MODULE']
-    settings = __import__(settings_module)
+    SETTINGS_MODULE = os.environ['SETTINGS_MODULE']
+    settings = __import__(SETTINGS_MODULE)
 
-import dictconfig
+from comrade.log import dictconfig
 
 # Pulled from commonware.log we don't have to import that, which drags with
 # it Django dependencies.
@@ -18,30 +18,35 @@ class RemoteAddressFormatter(logging.Formatter):
 
     def format(self, record):
         if ('%(REMOTE_ADDR)' in self._fmt
-            and 'REMOTE_ADDR' not in record.__dict__):
+                and 'REMOTE_ADDR' not in record.__dict__):
             record.__dict__['REMOTE_ADDR'] = None
         return logging.Formatter.format(self, record)
 
 class UTF8SafeFormatter(RemoteAddressFormatter):
-  def __init__(self, fmt=None, datefmt=None, encoding='utf-8'):
-    logging.Formatter.__init__(self, fmt, datefmt)
-    self.encoding = encoding
- 
-  def formatException(self, e):
-    r = logging.Formatter.formatException(self, e)
-    if type(r) in [types.StringType]:
-      r = r.decode(self.encoding, 'replace') # Convert to unicode
-    return r
- 
-  def format(self, record):
-    t = RemoteAddressFormatter.format(self, record)
-    if type(t) in [types.UnicodeType]:
-      t = t.encode(self.encoding, 'replace')
-    return t
+    def __init__(self, fmt=None, datefmt=None, encoding='utf-8'):
+        logging.Formatter.__init__(self, fmt, datefmt)
+        self.encoding = encoding
+    
+    def formatException(self, e):
+        r = logging.Formatter.formatException(self, e)
+        if type(r) in [types.StringType]:
+            r = r.decode(self.encoding, 'replace') # Convert to unicode
+        return r
+    
+    def format(self, record):
+        t = RemoteAddressFormatter.format(self, record)
+        if type(t) in [types.UnicodeType]:
+            t = t.encode(self.encoding, 'replace')
+        return t
 
 class NullHandler(logging.Handler):
     def emit(self, record):
         pass
+
+if os.path.exists('/dev/log'):
+    syslog_device = '/dev/log'
+elif os.path.exists('/dev/klog'):
+    syslog_device = '/dev/klog'
 
 base_fmt = ('%(name)s:%(levelname)s %(message)s:%(pathname)s:%(lineno)s')
 
@@ -69,19 +74,17 @@ cfg = {
         'null': {
             '()': NullHandler,
         },
+        'syslog': {
+            '()': logging.handlers.SysLogHandler,
+            'facility': settings.SYSLOG_FACILITY,
+            'address': syslog_device,
+            'formatter': 'prod',
+        },
     },
     'loggers': {
     },
     'root': {},
 }
-
-if os.path.exists('/dev/log'):
-    cfg['handlers']['syslog'] = {
-        '()': logging.handlers.SysLogHandler,
-        'facility': logging.handlers.SysLogHandler.LOG_LOCAL0,
-        'address': '/dev/log',
-        'formatter': 'prod',
-    }
 
 for key, value in settings.LOGGING.items():
     cfg[key].update(value)
