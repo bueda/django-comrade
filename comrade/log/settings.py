@@ -45,8 +45,8 @@ class NullHandler(logging.Handler):
 
 if os.path.exists('/dev/log'):
     syslog_device = '/dev/log'
-elif os.path.exists('/dev/klog'):
-    syslog_device = '/dev/klog'
+elif os.path.exists('/var/run/syslog'):
+    syslog_device = '/var/run/syslog'
 
 base_fmt = ('%(name)s:%(levelname)s %(message)s:%(pathname)s:%(lineno)s')
 
