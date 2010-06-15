@@ -2,10 +2,10 @@ import sys
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-import cronjobs
+from comrade import cronjobs
 
-import commonware.log
-log = commonware.log.getLogger('comrade.cron')
+import logging
+logger = logging.getLogger('comrade.cron')
 
 class Command(BaseCommand):
     help = 'Run a script, often a cronjob'
@@ -22,17 +22,17 @@ class Command(BaseCommand):
         registered = cronjobs.registered
 
         if not args:
-            log.error("Cron called but doesn't know what to do.")
+            logger.error("Cron called but doesn't know what to do.")
             print 'Try one of these: %s' % ', '.join(registered)
             sys.exit(1)
 
         script, args = args[0], args[1:]
         if script not in registered:
-            log.error("Cron called with unrecognized command: %s %s"
+            logger.error("Cron called with unrecognized command: %s %s"
                     % (script, args))
             print 'Unrecognized name: %s' % script
             sys.exit(1)
 
-        log.info("Beginning job: %s %s" % (script, args))
+        logger.info("Beginning job: %s %s" % (script, args))
         registered[script](*args)
-        log.info("Ending job: %s %s" % (script, args))
+        logger.info("Ending job: %s %s" % (script, args))
