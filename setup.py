@@ -1,6 +1,8 @@
 from distutils.core import setup
 import os
 
+execfile('bueda/bueda_version.py')
+
 # Compile the list of packages available, because distutils doesn't have
 # an easy way to do this.
 packages, data_files = [], []
@@ -24,7 +26,7 @@ for dirpath, dirnames, filenames in os.walk('comrade'):
 
 
 setup(name='django-comrade',
-      version='v0.1',
+      version = __version__,
       description='Bueda specific commonware',
       author='Christopher Peplin',
       author_email='peplin@bueda.com',
