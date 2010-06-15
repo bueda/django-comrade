@@ -1,7 +1,7 @@
 from distutils.core import setup
 import os
 
-execfile('bueda/bueda_version.py')
+execfile('comrade/version.py')
 
 # Compile the list of packages available, because distutils doesn't have
 # an easy way to do this.
