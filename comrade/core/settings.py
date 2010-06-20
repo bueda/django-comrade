@@ -2,8 +2,7 @@ import os
 import logging
 
 # Make filepaths relative to settings.
-ROOT = os.path.dirname(os.path.abspath(__file__))
-path = lambda *a: os.path.join(ROOT, *a)
+path = lambda root,*a: os.path.join(root, *a)
 
 ADMINS = (
            ('Christopher Peplin', 'peplin@bueda.com'),
@@ -106,10 +105,6 @@ if DEPLOYMENT != DeploymentType.SOLO:
     TEMPLATE_LOADERS = (
         ('django.template.loaders.cached.Loader', TEMPLATE_LOADERS),
     )
-
-TEMPLATE_DIRS = (
-    path('templates')
-)
 
 ROOT_URLCONF = 'urls'
 
