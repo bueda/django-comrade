@@ -47,18 +47,6 @@ else:
     LOG_LEVEL = logging.INFO
 USE_SYSLOG = DEPLOYMENT != DeploymentType.SOLO
 
-# Version Information
-
-if DEPLOYMENT == DeploymentType.SOLO:
-    import subprocess
-    GIT_COMMIT = subprocess.Popen(['git', 'rev-parse', '--short', 'HEAD'],
-        stdout=subprocess.PIPE).communicate()[0].strip()
-    del subprocess
-elif DEPLOYMENT != DeploymentType.PRODUCTION:
-    GIT_COMMIT = "$Format:%h$"[:-1]
-else:
-    GIT_COMMIT = ""
-
 # Cache Backend
 
 CACHE_TIMEOUT = 60
