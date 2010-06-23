@@ -1,14 +1,15 @@
+from django.conf import settings
+from django.http import HttpResponsePermanentRedirect, get_host
+
 import re
 import itertools
 
 _HTML_TYPES = ('text/html', 'application/xhtml+xml')    
-
 _SUPPORTED_TRANSFORMS = ['PUT', 'DELETE']
-
 _FORM_RE = re.compile(r'((<form\W[^>]*\bmethod=(\'|"|))(%s)((\'|"|)\b[^>]*>))'
         % '|'.join(_SUPPORTED_TRANSFORMS), re.IGNORECASE)
-
 _MIDDLEWARE_KEY = '_method'
+SSL = 'SSL'
  
 class HttpMethodsMiddleware(object):
     def process_request(self, request):
@@ -35,3 +36,20 @@ class HttpMethodsMiddleware(object):
             response.content = _FORM_RE.sub(add_transform_field,
                     response.content)
         return response
+
+
+class SslRedirectMiddleware(object):
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        secure = view_kwargs.pop(SSL, False)
+        if settings.SSL_ENABLED and secure != request.is_secure():
+            return self._redirect(request, secure)
+
+    def _redirect(self, request, secure):
+        protocol = 'https' if secure else 'http'
+        url = "%s://%s%s" % (protocol, get_host(request),
+                request.get_full_path())
+        if settings.DEBUG and request.method == 'POST':
+            raise RuntimeError, \
+        """Django can't perform a SSL redirect while maintaining POST data.
+           Structure your views so that redirects only occur during GETs."""
+        return HttpResponsePermanentRedirect(url)
