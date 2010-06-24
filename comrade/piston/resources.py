@@ -1,4 +1,4 @@
-from piston.resource import PistonResource
+from piston.resource import Resource as PistonResource
 from django.http import HttpResponseServerError, HttpResponseBadRequest
 
 from comrade.exceptions import (ComradeException, HttpResponseException, 
