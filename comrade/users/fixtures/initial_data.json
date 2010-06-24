@@ -3,70 +3,14 @@
         "pk": 1,
         "model": "auth.user",
         "fields": {
-            "username": "peplin@bueda.com", 
-            "email": "peplin@bueda.com", 
-            "first_name": "Christopher", 
-            "last_name": "Peplin", 
+            "username": "test@bueda.com", 
+            "email": "test@bueda.com", 
+            "first_name": "Test", 
+            "last_name": "Account", 
             "is_active": true, 
             "is_superuser": true, 
             "is_staff": true, 
-            "password": "sha1$70521$8346aef0c6eddee7432e8742fe54faaa63fdb69a"
-        }
-    },
-    {
-    	"pk": 2, 
-    	"model": "auth.user", 
-    	"fields": {
-      		"username": "vasco@bueda.com", 
-      		"email": "vasco@bueda.com",
-      		"first_name": "Vasco", 
-      		"last_name": "Pedro", 
-      		"is_active": true, 
-      		"is_superuser": true, 
-      		"is_staff": true, 
-      		"password": "sha1$f3c58$507ad0e6a898991a5c9cd72d5255debbd2c2ad17"
-    	}
-  	}, 
-    {
-        "pk": 3,
-        "model": "auth.user",
-        "fields": {
-            "username": "vignesh@bueda.com",
-            "email": "vignesh@bueda.com",
-            "first_name": "Vignesh",
-            "last_name": "Murugesan",
-            "is_active": true,
-            "is_superuser": true,
-            "is_staff": true,
-            "password": "sha1$5deab$82667dd5c30d1506bb120ea2e16ae723fd2e6556"
-        }
-    },
-    {
-        "pk": 4,
-        "model": "auth.user",
-        "fields": {
-            "username": "molly@bueda.com",
-            "email": "molly@bueda.com",
-            "first_name": "Molly",
-            "last_name": "Samuels",
-            "is_active": true,
-            "is_superuser": true,
-            "is_staff": true,
-            "password": "sha1$565c7$21a608252a3bcc9323fdbc5d116245a565e09a7a"
-        }
-    },    
-    {
-        "pk": 5,
-        "model": "auth.user",
-        "fields": {
-            "username": "ken",
-            "email": "ken@bueda.com",
-            "first_name": "Ken",
-            "last_name": "Kochis",
-            "is_active": true,
-            "is_superuser": true,
-            "is_staff": true,
-            "password": "sha1$0b7d4$95450fa8f8b472a11c671fa6b70d35d2828a205c"
+            "password": "sha1$3391b$345808047ab58c16d458767f8058bc47b43daa4e"
         }
     }
 ]
