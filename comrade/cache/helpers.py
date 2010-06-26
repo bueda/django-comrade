@@ -1,4 +1,4 @@
-from cache import cache
+import cache
 
 def check_cache(key):
     cached = cache.get(key)
