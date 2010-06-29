@@ -4,12 +4,7 @@ import logging
 # Make filepaths relative to settings.
 path = lambda root,*a: os.path.join(root, *a)
 
-ADMINS = (
-           ('Christopher Peplin', 'peplin@bueda.com'),
-           ('Vasco Pedro', 'vasco@bueda.com'),
-           ('Vignesh Murugesan','vignesh@bueda.com'),
-           ('Ken Kochis', 'ken@bueda.com'),
-)
+ADMINS = ()
 MANAGERS = ADMINS
 
 # Deployment Configuration
