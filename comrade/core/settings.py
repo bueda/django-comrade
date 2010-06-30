@@ -73,7 +73,7 @@ SERVER_EMAIL = "Bueda Operations <ops@bueda.com>"
 
 # Internationalization
 
-TIME_ZONE = 'America/Detroit'
+TIME_ZONE = 'UTC'
 LANGUAGE_CODE = 'en-us'
 USE_I18N = False
 
