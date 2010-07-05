@@ -4,7 +4,7 @@
         "model": "auth.user",
         "fields": {
             "first_name": "Bueda",
-            "last_lanem": "Tester",
+            "last_name": "Tester",
             "username": "test@bueda.com", 
             "email": "test@bueda.com", 
             "first_name": "Test", 
