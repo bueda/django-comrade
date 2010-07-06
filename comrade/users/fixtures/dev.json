@@ -3,14 +3,12 @@
         "pk": 1,
         "model": "auth.user",
         "fields": {
-            "first_name": "Bueda",
-            "last_name": "Tester",
             "username": "test@bueda.com", 
             "email": "test@bueda.com", 
             "first_name": "Test", 
             "last_name": "Account", 
             "is_active": true, 
-            "is_superuser": true, 
+            "is_superuser": false, 
             "is_staff": true, 
             "password": "sha1$3391b$345808047ab58c16d458767f8058bc47b43daa4e"
         }
