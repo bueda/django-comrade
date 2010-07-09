@@ -4,6 +4,8 @@ import types
 
 try:
     from django.conf import settings
+    # Actually trigger an import, since this is lazy
+    settings.SYSLOG_TAG
 except ImportError, e:
     import os
     SETTINGS_MODULE = os.environ['SETTINGS_MODULE']
