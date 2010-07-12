@@ -30,3 +30,13 @@ def authorized(test_func, template_name='401.html'):
         return wraps(view_func,
                 assigned=available_attrs(view_func))(_wrapped_view)
     return decorator
+
+def admin_login_required(view_func):
+    def _decorator(request, *args, **kwargs):
+        if request.user.is_authenticated() and request.user.is_staff:
+            return view_func(request, *args, **kwargs)
+        else:
+            t = loader.get_template('401.html')
+            return HttpResponse(t.render(RequestContext(request)), status=401)
+    return _decorator
+
