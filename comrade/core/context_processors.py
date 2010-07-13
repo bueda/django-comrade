@@ -9,3 +9,10 @@ def default(request):
     if settings.DEPLOYMENT != DeploymentType.PRODUCTION:
         context['GIT_COMMIT'] = settings.GIT_COMMIT
     return context
+
+def ssl_media(request):
+    if request.is_secure():
+        ssl_media_url = settings.MEDIA_URL.replace('http://','https://')
+    else:
+        ssl_media_url = settings.MEDIA_URL
+    return {'MEDIA_URL': ssl_media_url}
