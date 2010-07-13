@@ -12,6 +12,19 @@
             "is_staff": true, 
             "password": "sha1$3391b$345808047ab58c16d458767f8058bc47b43daa4e"
         }
+    },
+    {
+        "pk": 3,
+        "model": "auth.user",
+        "fields": {
+            "username": "testregular@bueda.com", 
+            "email": "testregular@bueda.com", 
+            "first_name": "Test", 
+            "last_name": "Regular Account", 
+            "is_active": true, 
+            "is_superuser": false, 
+            "is_staff": false, 
+            "password": "sha1$3391b$345808047ab58c16d458767f8058bc47b43daa4e"
+        }
     }
 ]
-
