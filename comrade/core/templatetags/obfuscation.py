@@ -1,4 +1,5 @@
 from django import template
+from django.utils.safestring import mark_safe
 from django.template.defaultfilters import stringfilter
 
 import string
@@ -24,7 +25,7 @@ def obfuscate_email(email):
         else:
             output = char
         obfuscated += output
-    return obfuscated
+    return mark_safe(obfuscated)
 
 class PartialNode(template.Node):
     def __init__(self, partial, params):
