@@ -71,6 +71,8 @@ else:
 DEFAULT_FROM_EMAIL = "Bueda Support <support@bueda.com>"
 SERVER_EMAIL = "Bueda Operations <ops@bueda.com>"
 
+CONTACT_EMAIL = 'support@bueda.com'
+
 # Internationalization
 
 TIME_ZONE = 'UTC'
