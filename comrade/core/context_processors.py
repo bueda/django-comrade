@@ -8,6 +8,7 @@ def default(request):
     context['site'] = Site.objects.get_current()
     if settings.DEPLOYMENT != DeploymentType.PRODUCTION:
         context['GIT_COMMIT'] = settings.GIT_COMMIT
+    context['site_email'] = settings.CONTACT_EMAIL
     return context
 
 def ssl_media(request):
