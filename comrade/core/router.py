@@ -48,19 +48,17 @@ def _get_handler_method(request_handler, http_method):
 class RestfulResource:
     http_methods = ['GET', 'POST', 'HEAD', 'PUT', 'DELETE', 'OPTIONS', 'TRACE']
 
-    @classmethod
-    def dispatch(cls, request, *args, **kwargs):
-        request_handler = cls()
+    def __call__(self, request, *args, **kwargs):
 
         _coerce_put_post(request)
 
-        if request.method in cls.http_methods:
-            handler_method = _get_handler_method(request_handler, request.method)
+        if request.method in self.http_methods:
+            handler_method = _get_handler_method(self, request.method)
             if handler_method:
                 return handler_method(request, *args, **kwargs)
 
-        methods = [method for method in cls.http_methods if
-                _get_handler_method(request_handler, method)]
+        methods = [method for method in self.http_methods if
+                _get_handler_method(self, method)]
         if len(methods) > 0:
             return HttpResponseNotAllowed(methods)
         else:
