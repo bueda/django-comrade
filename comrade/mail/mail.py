@@ -1,11 +1,20 @@
 from django.conf import settings
 from django.core.mail import EmailMessage
+from django.template import Context
+from django.template.loader import render_to_string
 
-def send_mail(subject, message, recipient_list, from_email=None):
+def direct_to_email(template, recipient_list, form_email=None,
+        extra_context=None, subject_template=None):
     """
-    Easy wrapper around Django's easy wrapper of the mail interface.
+    Sends an email of type email to user.email. Text of subject and message
+    rendered from templates/mail/{email}.txt and templates/mail/{email}_subject.txt
+    usign specified context
+    """
+    extra_context = extra_context or {}
+    context = Context(extra_context)
+    if not subject_template:
+        subject = render_to_string('mail/%s_subject.txt' % template, context)
+    body = render_to_string('mail/%s.txt' % template, context)
 
-    Does the same thing as send_mail, but with a couple of Bueda additions.
-    """
-    return EmailMessage(subject, message, from_email, recipient_list,
+    return EmailMessage(subject, body, recipient_list,
             headers={'Reply-To': settings.DEFAULT_FROM_EMAIL}).send()
