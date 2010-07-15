@@ -19,11 +19,11 @@ def maintenance_mode(request, template_name='503.html'):
     t = loader.get_template(template_name)
     return HttpResponseTemporaryUnavailable(t.render(RequestContext(request)))
 
-def direct_to_template(request, template, extra_context=None, status=None,
-        mimetype=None, **kwargs):
+def direct_to_template(request, template, extra_context=None, mimetype=None,
+        status=None, **kwargs):
     '''
     Duplicates behavior of django.views.generic.simple.direct_to_template
-    but accepts a status
+    but accepts a status argument.
     '''
     if extra_context is None:
         extra_context = {}
