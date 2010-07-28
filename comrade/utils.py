@@ -22,3 +22,11 @@ def chunked(seq, n):
     """
     for i in xrange(0, len(seq), n):
         yield seq[i:i+n]
+
+def flatten(lst):
+    for elem in lst:
+        if hasattr(elem, '__iter__'):
+            for e in flatten(elem):
+                yield e
+        else:
+            yield elem
