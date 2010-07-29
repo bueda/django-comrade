@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import available_attrs
 from django.utils.http import urlquote
 from django.http import HttpResponse
@@ -29,4 +30,14 @@ def authorized(test_func, template_name='401.html'):
             return HttpResponse(t.render(RequestContext(request)), status=401)
         return wraps(view_func,
                 assigned=available_attrs(view_func))(_wrapped_view)
+    return decorator
+
+def load_instance(model):
+    def decorator(view):
+        def _wrapper(request, object_id=None, *args, **kwargs):
+            if object_id:
+                instance = get_object_or_404(model, pk=object_id)
+                return view(request, instance, *args, **kwargs)
+            return view(request, *args, **kwargs)
+        return wraps(view)(_wrapper)
     return decorator
