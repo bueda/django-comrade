@@ -24,8 +24,8 @@ class HttpJsonResponse(HttpResponse):
         Returns `dict`.
 
         Borrowed from the Piston API framework.
-        TODO if we use this a lot, consider just using the Piston framework
-        to do those tasks.
+        If you find yourself using this heavily, consider just using the Piston
+        framework.
         """
         def _any(thing, fields=()):
             """
