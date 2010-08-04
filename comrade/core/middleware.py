@@ -65,7 +65,7 @@ class SslRedirectMiddleware(object):
 
 
 class ArgumentLogMiddleware(object):
-    def process_view(request, view, args, kwargs):
+    def process_view(self, request, view, args, kwargs):
         logger.debug('Calling %s.%s' % (view.__module__, view.__name__))
         logger.debug('Arguments: %s' % (kwargs or (args,)))
 
