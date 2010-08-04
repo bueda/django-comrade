@@ -53,3 +53,10 @@ class SslRedirectMiddleware(object):
         """Django can't perform a SSL redirect while maintaining POST data.
            Structure your views so that redirects only occur during GETs."""
         return HttpResponsePermanentRedirect(url)
+
+class ArgumentLogMiddleware(object):
+    import logging
+    logger = logging.getLogger('comrade.cron')
+    def process_view(request, view, args, kwargs):
+        logger.debug('Calling %s.%s' % (view.__module__, view.__name__))
+        logger.debug('Arguments: %s' % (kwargs or (args,)))
