@@ -1,8 +1,17 @@
 from django.conf import settings
-from django.http import HttpResponsePermanentRedirect, get_host
+from django.http import (HttpResponsePermanentRedirect, get_host,
+        HttpResponseRedirect)
+from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse
+
+from comrade.views.simple import direct_to_template
 
 import re
 import itertools
+
+import logging
+logger = logging.getLogger('comrade.cron')
+
 
 _HTML_TYPES = ('text/html', 'application/xhtml+xml')    
 _SUPPORTED_TRANSFORMS = ['PUT', 'DELETE']
@@ -54,9 +63,24 @@ class SslRedirectMiddleware(object):
            Structure your views so that redirects only occur during GETs."""
         return HttpResponsePermanentRedirect(url)
 
+
 class ArgumentLogMiddleware(object):
-    import logging
-    logger = logging.getLogger('comrade.cron')
     def process_view(request, view, args, kwargs):
         logger.debug('Calling %s.%s' % (view.__module__, view.__name__))
         logger.debug('Arguments: %s' % (kwargs or (args,)))
+
+
+class PermissionRedirectMiddleware(object):
+    """This middleware must be the last of any view middleware, as it actually
+    renders the view and returns a response.
+    """
+    def __init__(self, template='401.html', args=None, kwargs=None):
+        self.template = template
+        self.args = args or ()
+        self.kwargs = kwargs or {}
+
+    def process_view(self, request, view, args, kwargs):
+        try:
+            return view(request, *args, **kwargs)
+        except PermissionDenied:
+            return direct_to_template(self.template, status=401)
