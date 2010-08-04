@@ -1,8 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import available_attrs
-from django.utils.http import urlquote
-from django.http import HttpResponse
-from django.template import loader, RequestContext
+
+from comrade.views.simple import direct_to_template
 
 from functools import wraps
 
@@ -25,9 +24,7 @@ def authorized(test_func, template_name='401.html'):
         def _wrapped_view(request, *args, **kwargs):
             if test_func(request.user, *args, **kwargs):
                 return view_func(request, *args, **kwargs)
-            path = urlquote(request.get_full_path())
-            t = loader.get_template(template_name)
-            return HttpResponse(t.render(RequestContext(request)), status=401)
+            return direct_to_template(template_name, status=401)
         return wraps(view_func,
                 assigned=available_attrs(view_func))(_wrapped_view)
     return decorator
