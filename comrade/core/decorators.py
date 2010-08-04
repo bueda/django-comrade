@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import available_attrs
+from django.utils.decorators import decorator_from_middleware_with_args
 
-from comrade.views.simple import direct_to_template
+from comrade.core.middleware import PermissionRedirectMiddleware
 
 from functools import wraps
 
@@ -13,21 +14,6 @@ def singleton(cls):
         return instances[cls]
     return getinstance
 
-def authorized(test_func, template_name='401.html'):
-    """
-    Decorator for views that checks that the user passes the given test,
-    redirecting to the unauthorized page if it fails. The test should be a
-    callable that takes the user object and returns True if the user passes.
-    """
-
-    def decorator(view):
-        def _wrapped(request, *args, **kwargs):
-            if test_func(request.user, *args, **kwargs):
-                return view(request, *args, **kwargs)
-            return direct_to_template(template_name, status=401)
-        return wraps(view, assigned=available_attrs(view))(_wrapped)
-    return decorator
-
 def load_instance(model):
     def decorator(view):
         def _wrapped(request, object_id=None, *args, **kwargs):
@@ -37,3 +23,5 @@ def load_instance(model):
             return view(request, *args, **kwargs)
         return wraps(view, assigned=available_attrs(view))(_wrapped)
     return decorator
+
+authorized = decorator_from_middleware_with_args(PermissionRedirectMiddleware)
