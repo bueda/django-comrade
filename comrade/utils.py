@@ -30,3 +30,8 @@ def flatten(lst):
                 yield e
         else:
             yield elem
+
+def find_dict_key(dictionary, search_value):
+    for key, value in dictionary.iteritems():
+        if value == search_value:
+            return key
