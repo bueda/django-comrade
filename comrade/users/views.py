@@ -1,12 +1,11 @@
 from django.conf import settings
-from django.contrib.auth import login as auth_login
+from django.contrib.auth import login as auth_login, REDIRECT_FIELD_NAME
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 
 import re
 
-from comrade.users import REDIRECT_FIELD_NAME
 from comrade.users import utils
 from comrade.views.simple import direct_to_template
 
