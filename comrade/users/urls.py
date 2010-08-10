@@ -6,7 +6,9 @@ reverse_lazy = lazy(reverse, unicode)
 
 urlpatterns = patterns('comrade.users.views',
     url(r'^login/$', 'login', name='login'),
-    url(r'^login/multipass/$', 'login', {'multipass': True}, name='multipass_login'),
+    url(r'^login/multipass/$', 'login',
+            {'multipass': True, 'redirect_field_name': 'to'},
+            name='multipass_login'),
 )
 
 urlpatterns += patterns('django.contrib.auth.views',
