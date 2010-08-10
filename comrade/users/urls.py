@@ -4,8 +4,12 @@ from django.utils.functional import lazy
 
 reverse_lazy = lazy(reverse, unicode)
 
-urlpatterns = patterns('django.contrib.auth.views',
+urlpatterns = patterns('comrade.users.views',
     url(r'^login/$', 'login', name='login'),
+    url(r'^login/multipass/$', 'login', {'multipass': True}, name='multipass_login'),
+)
+
+urlpatterns += patterns('django.contrib.auth.views',
     url(r'^logout/$', 'logout', {'next_page':'/'}, name='logout'),
     url(r'^password/forgot/$', 'password_reset',
             {'post_reset_redirect':reverse_lazy('account:password_reset_done')},
