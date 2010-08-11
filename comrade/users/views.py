@@ -12,7 +12,7 @@ from comrade.views.simple import direct_to_template
 import commonware.log
 logger = commonware.log.getLogger('comrade.users.views')
 
-def _add_sso(multipass, tender_url, redirect_to):
+def _add_sso(request, multipass, tender_url, redirect_to):
     if multipass and redirect_to == tender_url:
             redirect_to += '?sso=' + utils.multipass(request.user)
     return redirect_to
@@ -37,7 +37,7 @@ def login(request, multipass=False, template_name='registration/login.html',
             redirect_to = settings.LOGIN_REDIRECT_URL
 
     if request.user.is_authenticated():
-        redirect_to = _add_sso(multipass, tender_url, redirect_to)
+        redirect_to = _add_sso(request, multipass, tender_url, redirect_to)
         return HttpResponseRedirect(redirect_to)
 
     if request.method == "POST":
@@ -46,7 +46,7 @@ def login(request, multipass=False, template_name='registration/login.html',
             auth_login(request, form.get_user())
             if request.session.test_cookie_worked():
                 request.session.delete_test_cookie()
-            redirect_to = _add_sso(multipass, tender_url, redirect_to)
+            redirect_to = _add_sso(request, multipass, tender_url, redirect_to)
             return HttpResponseRedirect(redirect_to)
     else:
         form = authentication_form(request)
