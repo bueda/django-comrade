@@ -17,37 +17,32 @@ def login(request, multipass=False, template_name='registration/login.html',
           authentication_form=AuthenticationForm):
     """Displays the login form and handles the login action."""
 
-    if request.user.is_authenticated():
-        return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
-
     redirect_to = request.REQUEST.get(redirect_field_name, '')
 
-    if hasattr(settings, 'TENDER_URL'):
-        tender_url = settings.TENDER_URL
-    else:
-        tender_url = None
-    
+    tender_url = getattr(settings, 'TENDER_URL', None)
+    if not redirect_to or ' ' in redirect_to:
+        redirect_to = settings.LOGIN_REDIRECT_URL
+    # Heavier security check -- redirects to http://example.com should 
+    # not be allowed, but things like /view/?param=http://example.com 
+    # should be allowed. This regex checks if there is a '//' *before* a
+    # question mark. Unless of course, the redirect is to the Tender
+    # app.
+    elif '//' in redirect_to and re.match(r'[^\?]*//', redirect_to):
+        if redirect_to != tender_url:
+            redirect_to = settings.LOGIN_REDIRECT_URL
+        elif multipass and redirect_to == tender_url:
+                redirect_to += '?sso=' + utils.multipass(request.user)
+
+    if request.user.is_authenticated():
+        return HttpResponseRedirect(redirect_to)
+
     if request.method == "POST":
         form = authentication_form(data=request.POST)
         if form.is_valid():
-            if not redirect_to or ' ' in redirect_to:
-                redirect_to = settings.LOGIN_REDIRECT_URL
-            # Heavier security check -- redirects to http://example.com should 
-            # not be allowed, but things like /view/?param=http://example.com 
-            # should be allowed. This regex checks if there is a '//' *before* a
-            # question mark. Unless of course, the redirect is to the Tender
-            # app.
-            elif '//' in redirect_to and re.match(r'[^\?]*//', redirect_to):
-                if redirect_to != tender_url:
-                    redirect_to = settings.LOGIN_REDIRECT_URL
-            
             auth_login(request, form.get_user())
 
             if request.session.test_cookie_worked():
                 request.session.delete_test_cookie()
-
-            if multipass and redirect_to == tender_url:
-                redirect_to += '?sso=' + utils.multipass(request.user)
 
             return HttpResponseRedirect(redirect_to)
     else:
