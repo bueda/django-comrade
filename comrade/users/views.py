@@ -15,6 +15,7 @@ logger = commonware.log.getLogger('comrade.users.views')
 def _add_sso(multipass, tender_url, redirect_to):
     if multipass and redirect_to == tender_url:
             redirect_to += '?sso=' + utils.multipass(request.user)
+    return redirect_to
 
 def login(request, multipass=False, template_name='registration/login.html',
           redirect_field_name=REDIRECT_FIELD_NAME,
