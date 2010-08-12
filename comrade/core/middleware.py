@@ -10,7 +10,7 @@ import re
 import itertools
 
 import logging
-logger = logging.getLogger('comrade.cron')
+logger = logging.getLogger('comrade.core.middleware')
 
 
 _HTML_TYPES = ('text/html', 'application/xhtml+xml')    
