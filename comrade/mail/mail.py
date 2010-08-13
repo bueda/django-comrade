@@ -3,8 +3,8 @@ from django.core.mail import EmailMessage
 from django.template import Context
 from django.template.loader import render_to_string
 from django.contrib.sites.models import Site
-from comrade.mail.signals import email_sent
 
+from comrade.mail.signals import email_sent
 
 def direct_to_email(template, recipient_list, extra_context=None,
         from_email=None, subject_template=None):
@@ -20,9 +20,8 @@ def direct_to_email(template, recipient_list, extra_context=None,
                 '%s_subject.txt' % template, context).strip('\n')
     message = render_to_string('%s.txt' % template, context)
 
-    email_sent.send(sender=None, recipient_list=recipient_list,
-            from_address=(from_email or settings.DEFAULT_FROM_EMAIL),
-            description=template)
+    email_sent.send(sender=template, recipient_list=recipient_list,
+            from_address=(from_email or settings.DEFAULT_FROM_EMAIL))
 
     return EmailMessage(subject, message, from_email, recipient_list,
             headers={'Reply-To': settings.DEFAULT_FROM_EMAIL}).send()
