@@ -4,6 +4,8 @@ Generate multipass for single sign-on with Tender.
 Requires TENDER_API KEY and TENDER_ACCOUNT_KEY to be in the app settings.py.
 """
 from django.conf import settings
+from django.core import exceptions
+from django.db import models
 
 import base64
 import hashlib
@@ -53,3 +55,19 @@ def multipass(user):
     encrypted_bytes = aes.encrypt(data)
 
     return urllib.quote(base64.b64encode(encrypted_bytes))
+
+def user_profile_class():
+    if not getattr(settings, 'AUTH_PROFILE_MODULE', False):
+        return None
+    try:
+        app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
+    except ValueError:
+        return None
+    try:
+        model = models.get_model(app_label, model_name)
+        if model is None:
+            return None
+    except (ImportError, exceptions.ImproperlyConfigured):
+        return None
+    else:
+        return model
