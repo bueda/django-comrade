@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect
 import re
 
 from comrade.users import utils
+from comrade.users.forms import LongAuthenticationForm
 from comrade.views.simple import direct_to_template
 
 import commonware.log
@@ -19,7 +20,7 @@ def _add_sso(request, multipass, tender_url, redirect_to):
 
 def login(request, multipass=False, template_name='registration/login.html',
           redirect_field_name=REDIRECT_FIELD_NAME,
-          authentication_form=AuthenticationForm):
+          authentication_form=LongAuthenticationForm):
     """Displays the login form and handles the login action."""
 
     redirect_to = request.REQUEST.get(redirect_field_name, '')
