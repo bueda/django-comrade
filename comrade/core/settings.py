@@ -22,7 +22,7 @@ class DeploymentType:
     }
 
 if 'DEPLOYMENT_TYPE' in os.environ:
-    DEPLOYMENT = os.environ['DEPLOYMENT_TYPE']
+    DEPLOYMENT = os.environ['DEPLOYMENT_TYPE'].upper()
 else:
     DEPLOYMENT = DeploymentType.SOLO
 
