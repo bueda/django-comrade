@@ -84,6 +84,7 @@ cfg = {
         },
     },
     'loggers': {
+        'comrade': {},
     },
     'root': {},
 }
