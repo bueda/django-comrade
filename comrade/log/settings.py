@@ -85,20 +85,22 @@ cfg = {
     },
     'loggers': {
         'comrade': {},
-    },
-    'root': {},
+        'comrade.cache.backend': {
+            'level': 'ERROR'
+        }
+    }
 }
 
 for key, value in settings.LOGGING.items():
     cfg[key].update(value)
 
 # Set the level and handlers for all loggers.
-for logger in cfg['loggers'].values() + [cfg['root']]:
+for logger in cfg['loggers'].values():
     if 'handlers' not in logger:
         logger['handlers'] = ['syslog' if settings.USE_SYSLOG else 'console']
     if 'level' not in logger:
         logger['level'] = settings.LOG_LEVEL
-    if logger is not cfg['root'] and 'propagate' not in logger:
+    if 'propagate' not in logger:
         logger['propagate'] = False
 
 dictconfig.dictConfig(cfg)
