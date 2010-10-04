@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from comrade import cronjobs
 
 import logging
-logger = logging.getLogger('comrade.cron')
+logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = 'Run a script, often a cronjob'

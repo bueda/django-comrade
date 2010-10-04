@@ -5,7 +5,7 @@ from comrade.exceptions import (ComradeError, HttpResponseError,
         BadRequestError)
 
 import commonware.log
-logger = commonware.log.getLogger('comrade.piston.resources')
+logger = commonware.log.getLogger(__name__)
 
 class Resource(PistonResource):
     def error_handler(self, error, request, method):

@@ -13,7 +13,7 @@ from django.utils.http import urlquote
 import hashlib
 
 import logging
-logger = logging.getLogger('comrade.cache')
+logger = logging.getLogger(__name__)
 
 MAX_KEY_LENGTH = 250
 
