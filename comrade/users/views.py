@@ -11,7 +11,7 @@ from comrade.users.forms import LongAuthenticationForm
 from comrade.views.simple import direct_to_template
 
 import commonware.log
-logger = commonware.log.getLogger('comrade.users.views')
+logger = commonware.log.getLogger(__name__)
 
 def _add_sso(request, multipass, tender_url, redirect_to):
     if multipass and redirect_to == tender_url:

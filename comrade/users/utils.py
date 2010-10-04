@@ -17,7 +17,7 @@ from Crypto.Cipher import AES
 from datetime import datetime, timedelta
 
 import commonware.log
-logger = commonware.log.getLogger('comrade.users.views')
+logger = commonware.log.getLogger(__name__)
 
 def multipass(user):
     if (not hasattr(settings, 'TENDER_API_KEY')

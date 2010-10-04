@@ -3,7 +3,7 @@ from django.template import RequestContext, loader
 from django.conf import settings
 
 import logging
-logger = logging.getLogger('comrade.views.simple')
+logger = logging.getLogger(__name__)
 
 def status(request):
     logger.debug("Responding to status check")
