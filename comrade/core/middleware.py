@@ -65,6 +65,9 @@ class SslRedirectMiddleware(object):
 
 
 class ArgumentLogMiddleware(object):
+    ignored_modules = ['debug_toolbar.views',
+            'django.views.static',]
+
     def process_view(self, request, view, args, kwargs):
         if hasattr(view, '__name__'):
             name = view.__name__
@@ -72,9 +75,10 @@ class ArgumentLogMiddleware(object):
             name = view.__class__
         else:
             name = ''
-        if view.__module__ != 'django.views.static':
+        if view.__module__ not in self.ignored_modules:
             logger.debug('Calling %s.%s' % (view.__module__, name))
-            logger.debug('Arguments: %s' % (kwargs or (args,)))
+            if kwargs or args:
+                logger.debug('Arguments: %s' % (kwargs or (args,)))
 
 
 class PermissionRedirectMiddleware(object):
