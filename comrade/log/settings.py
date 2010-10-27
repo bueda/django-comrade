@@ -2,15 +2,6 @@ import logging, logging.handlers
 import os.path
 import types
 
-try:
-    from django.conf import settings
-    # Actually trigger an import, since this is lazy
-    settings.SYSLOG_TAG
-except ImportError, e:
-    import os
-    SETTINGS_MODULE = os.environ['SETTINGS_MODULE']
-    settings = __import__(SETTINGS_MODULE)
-
 from comrade.log import dictconfig
 
 # Pulled from commonware.log we don't have to import that, which drags with
@@ -45,62 +36,63 @@ class NullHandler(logging.Handler):
     def emit(self, record):
         pass
 
-if os.path.exists('/dev/log'):
-    syslog_device = '/dev/log'
-elif os.path.exists('/var/run/syslog'):
-    syslog_device = '/var/run/syslog'
+def initialize_logging(syslog_tag, syslog_facility, loggers,
+        log_level=logging.INFO, use_syslog=False):
+    if os.path.exists('/dev/log'):
+        syslog_device = '/dev/log'
+    elif os.path.exists('/var/run/syslog'):
+        syslog_device = '/var/run/syslog'
 
-base_fmt = ('%(name)s:%(levelname)s %(message)s:%(pathname)s:%(lineno)s')
+    base_fmt = ('%(name)s:%(levelname)s %(message)s:%(pathname)s:%(lineno)s')
 
-cfg = {
-    'version': 1,
-    'filters': {},
-    'formatters': {
-        'debug': {
-            '()': UTF8SafeFormatter,
-            'datefmt': '%H:%M:%s',
-            'format': '%(asctime)s ' + base_fmt,
+    cfg = {
+        'version': 1,
+        'filters': {},
+        'formatters': {
+            'debug': {
+                '()': UTF8SafeFormatter,
+                'datefmt': '%H:%M:%s',
+                'format': '%(asctime)s ' + base_fmt,
+            },
+            'prod': {
+                '()': UTF8SafeFormatter,
+                'datefmt': '%H:%M:%s',
+                'format': '%s: [%%(REMOTE_ADDR)s] %s' % (syslog_tag, base_fmt),
+            },
         },
-        'prod': {
-            '()': UTF8SafeFormatter,
-            'datefmt': '%H:%M:%s',
-            'format': '%s: [%%(REMOTE_ADDR)s] %s' % (settings.SYSLOG_TAG,
-                                                     base_fmt),
+        'handlers': {
+            'console': {
+                '()': logging.StreamHandler,
+                'formatter': 'debug',
+            },
+            'null': {
+                '()': NullHandler,
+            },
+            'syslog': {
+                '()': logging.handlers.SysLogHandler,
+                'facility': syslog_facility,
+                'address': syslog_device,
+                'formatter': 'prod',
+            },
         },
-    },
-    'handlers': {
-        'console': {
-            '()': logging.StreamHandler,
-            'formatter': 'debug',
-        },
-        'null': {
-            '()': NullHandler,
-        },
-        'syslog': {
-            '()': logging.handlers.SysLogHandler,
-            'facility': settings.SYSLOG_FACILITY,
-            'address': syslog_device,
-            'formatter': 'prod',
-        },
-    },
-    'loggers': {
-        'comrade': {},
-        'comrade.cache.backend': {
-            'level': 'ERROR'
+        'loggers': {
+            'comrade': {},
+            'comrade.cache.backend': {
+                'level': 'ERROR'
+            }
         }
     }
-}
 
-for key, value in settings.LOGGING.items():
-    cfg[key].update(value)
+    for key, value in loggers.items():
+        cfg[key].update(value)
 
-# Set the level and handlers for all loggers.
-for logger in cfg['loggers'].values():
-    if 'handlers' not in logger:
-        logger['handlers'] = ['syslog' if settings.USE_SYSLOG else 'console']
-    if 'level' not in logger:
-        logger['level'] = settings.LOG_LEVEL
-    if 'propagate' not in logger:
-        logger['propagate'] = False
+    # Set the level and handlers for all loggers.
+    for logger in cfg['loggers'].values():
+        if 'handlers' not in logger:
+            logger['handlers'] = ['syslog' if use_syslog else 'console']
+        if 'level' not in logger:
+            logger['level'] = log_level
+        if 'propagate' not in logger:
+            logger['propagate'] = False
 
-dictconfig.dictConfig(cfg)
+    dictconfig.dictConfig(cfg)
