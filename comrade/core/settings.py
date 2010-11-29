@@ -43,6 +43,11 @@ else:
     LOG_LEVEL = logging.INFO
 USE_SYSLOG = DEPLOYMENT != DeploymentType.SOLO
 
+# Sessions
+
+if DEPLOYMENT != DeploymentType.SOLO:
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+
 # Cache Backend
 
 CACHE_TIMEOUT = 60
