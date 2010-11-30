@@ -2,6 +2,7 @@ from django import test
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.core.cache import cache
 
 from nose.tools import eq_, ok_
 import json
@@ -18,6 +19,7 @@ class BaseTest(test.TestCase):
     def tearDown(self):
         super(BaseTest, self).tearDown()
         mockito.unstub()
+        cache.clear()
 
     def login(self):
         return self.client.login(username='test', password='test')
