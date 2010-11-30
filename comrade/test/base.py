@@ -45,10 +45,10 @@ class BaseTest(test.TestCase):
         self.assertEqual(response.status_code, status_code,
             msg_prefix + "Couldn't retrieve page: Response code was %d"
             " (expected %d)" % (response.status_code, status_code))
-        json = json.loads(response.content)
-        assert key in json
+        data = json.loads(response.content)
+        assert key in data
         if value:
-            eq_(json[key], value)
+            eq_(data[key], value)
 
 
 class BaseModelTest(BaseTest):
