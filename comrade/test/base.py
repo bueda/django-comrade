@@ -37,7 +37,7 @@ class BaseTest(test.TestCase):
         response = method(url)
         eq_(response.status_code, 405)
 
-    def assertJsonContains(self, response, key, value, status_code=200,
+    def assertJsonContains(self, response, key, value=None, status_code=200,
             msg_prefix=''):
         if msg_prefix:
             msg_prefix += ": "
@@ -47,7 +47,8 @@ class BaseTest(test.TestCase):
             " (expected %d)" % (response.status_code, status_code))
         json = json.loads(response.content)
         assert key in json
-        eq_(json[key], value)
+        if value:
+            eq_(json[key], value)
 
 
 class BaseModelTest(BaseTest):
