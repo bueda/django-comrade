@@ -12,7 +12,7 @@ class HttpJsonResponse(HttpResponse):
         content = simplejson.dumps(self._construct(object),
                 cls=json.DjangoJSONEncoder, ensure_ascii=False)
         super(HttpJsonResponse, self).__init__(
-                content, content_type='application/json')
+                content, content_type='application/json', status=status)
 
     @staticmethod
     def _construct(data):
