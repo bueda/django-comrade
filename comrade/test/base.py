@@ -13,7 +13,6 @@ class BaseTest(test.TestCase):
 
     def setUp(self):
         super(BaseTest, self).setUp()
-        self.user = User.objects.get(username='test')
         self.login()
 
     def tearDown(self):
@@ -21,14 +20,16 @@ class BaseTest(test.TestCase):
         mockito.unstub()
         cache.clear()
 
-    def login(self):
-        return self.client.login(username='test', password='test')
+    def login(self, password=None):
+        return self.client.login(username=self.user.username or 'test',
+                password=password or 'test')
 
-    def _test_unauthenticated(self, method, url, allowed=False):
+    def _test_unauthenticated(self, method, url, next_url=None, allowed=False):
         self.client.logout()
         response = method(url)
         if not allowed:
-            self.assertRedirects(response, reverse('account:login') +
+            self.assertRedirects(response,
+                    (next_url or reverse('account:login')) +
                     '?' + REDIRECT_FIELD_NAME + '=' + url)
         else:
             eq_(response.status_code, 200)
