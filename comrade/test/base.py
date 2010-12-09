@@ -21,7 +21,8 @@ class BaseTest(test.TestCase):
         cache.clear()
 
     def login(self, password=None):
-        return self.client.login(username=self.user.username or 'test',
+        return self.client.login(username=(
+                    getattr(self, 'user', None) and self.user.username) or 'test',
                 password=password or 'test')
 
     def _test_unauthenticated(self, method, url, next_url=None, allowed=False):
