@@ -51,8 +51,9 @@ class BaseTest(test.TestCase):
             msg_prefix + "Couldn't retrieve page: Response code was %d"
             " (expected %d)" % (response.status_code, status_code))
         data = json.loads(response.content)
-        assert key in data
-        if value:
+        ok_(key in data, msg_prefix + "Couldn't find key '%s' in JSON:\n %s" %
+                (key, data))
+        if value is not None:
             eq_(data[key], value)
 
 
