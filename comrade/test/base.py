@@ -54,5 +54,10 @@ class BaseTest(test.TestCase):
 
 
 class BaseModelTest(BaseTest):
-    def check_unicode(self):
-        ok_(isinstance(self.instance.__unicode__(), unicode))
+    def setUp(self, instance=None):
+        super(BaseModelTest, self).setUp()
+        self.instance = instance
+
+    def test_unicode(self):
+        if self.instance:
+            ok_(isinstance(self.instance.__unicode__(), unicode))
