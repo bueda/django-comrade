@@ -27,6 +27,9 @@ class BaseTest(test.TestCase):
 
     def _test_unauthenticated(self, method, url, next_url=None, allowed=False):
         self.client.logout()
+        self._test_unauthorized(method, url, next_url, allowed)
+
+    def _test_unauthorized(self, method, url, next_url=None, allowed=False):
         response = method(url)
         if not allowed:
             self.assertRedirects(response,
