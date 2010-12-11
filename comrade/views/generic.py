@@ -43,8 +43,10 @@ class HybridDetailView(JSONResponseMixin, SingleObjectTemplateResponseMixin,
 class HybridListView(JSONResponseMixin, MultipleObjectTemplateResponseMixin,
         BaseListView):
     def render_to_response(self, context, **response_kwargs):
-        # Look for a 'format=json' GET argument
-        if self.request.is_ajax() or self.request.GET.get('format') == 'json':
+        # Look for a 'format=json' GET argument or CONTENT-TYPE of
+        # application/json
+        if (self.request.GET.get('format') == 'json' or
+                self.request.META.get('CONTENT_TYPE') == 'application/json'):
             return JSONResponseMixin.render_to_response(self, context,
                     **response_kwargs)
         else:
