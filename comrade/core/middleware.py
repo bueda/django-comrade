@@ -5,10 +5,20 @@ from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.contrib.auth.views import redirect_to_login
 
-from comrade.views.simple import direct_to_template
-
 import re
 import itertools
+
+try:
+    # Import Piston if it's installed, but don't die if it's not here. Only a
+    # limited number of Middleware require it.
+    import piston.utils
+    
+    # Importing this registers translators for the MimeTypes we are using.
+    import piston.emitters
+except ImportError:
+    pass
+
+from comrade.views.simple import direct_to_template
 
 import logging
 logger = logging.getLogger(__name__)
@@ -96,3 +106,21 @@ class PermissionRedirectMiddleware(object):
     def process_exception(self, request, exception):
         if isinstance(exception, PermissionDenied):
             return redirect_to_login(request.path)
+
+class POSTDataMassageMiddleware(object):
+    """Middleware to take all POST data - whether JSON, form encoded fields,
+    XML, etc. and store it in the `data` attribute on the request.
+
+    Requires django-piston.
+    """
+    def process_request(self, request):
+        if request.method in ('POST', 'PUT'):
+            try:
+                piston.utils.translate_mime(request)
+            except piston.utils.MimerDataException:
+                return rc.BAD_REQUEST
+            if not hasattr(request, 'data'):
+                if request.method == 'POST':
+                    request.data = request.POST
+                else:
+                    request.data = request.PUT
