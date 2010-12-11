@@ -3,6 +3,7 @@ from django.http import (HttpResponsePermanentRedirect, get_host,
         HttpResponseRedirect)
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
+from django.contrib.auth.views import redirect_to_login
 
 from comrade.views.simple import direct_to_template
 
@@ -82,25 +83,16 @@ class ArgumentLogMiddleware(object):
 
 
 class PermissionRedirectMiddleware(object):
-    """Middleware that checks that the user passes the given test,
-    redirecting to the unauthorized page if it fails. The test should be a
-    callable that takes the user object and returns True if the user passes.
-    
-    This middleware must be the last of any view middleware, as it actually
-    renders the view and returns a response.
-    """
-    def __init__(self, test_func=None, template='401.html', args=None,
-            kwargs=None):
-        self.template = template
-        self.test_func = test_func
-        self.args = args or ()
-        self.kwargs = kwargs or {}
+    """Middleware that catches any PermissionDenied errors that haven't been
+    caught in the view and redirects the user to the login page. This allows any helper
+    method simple raise a PermissionDenied instead of needing the check if
+    helper methods return an HttpResponse.
 
-    def process_view(self, request, view, args, kwargs):
-        try:
-            if self.test_func and self.test_func(request.user, *args, **kwargs):
-                return view(request, *args, **kwargs)
-            else:
-                raise PermissionDenied
-        except PermissionDenied:
-            return direct_to_template(request, self.template, status=401)
+    This middleware will not be required as soon as this patch lands in Django:
+    http://code.djangoproject.com/ticket/13850 - after that we can just define a
+    customer 403 handler that redirects instead of renders.
+    
+    """
+    def process_exception(self, request, exception):
+        if isinstance(exception, PermissionDenied):
+            return redirect_to_login(request.path)
