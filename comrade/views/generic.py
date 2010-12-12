@@ -1,7 +1,10 @@
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.core import serializers
 from django.views.generic.list import (BaseListView,
         MultipleObjectTemplateResponseMixin)
+from django.views.generic.edit import (BaseFormView, BaseCreateView, FormMixin,
+        ModelFormMixin)
 from django.views.generic.detail import (BaseDetailView,
         SingleObjectTemplateResponseMixin)
 
@@ -19,6 +22,7 @@ else:
             'text/xml; charset=utf-8')
     piston.emitters.Emitter.register('application/json',
             piston.emitters.JSONEmitter, 'application/json; charset=utf-8')
+
 
 class ContentNegotiationMixin(object):
     """Requires the AcceptMiddleware to be enabled."""
@@ -56,6 +60,7 @@ class ContentNegotiationMixin(object):
                 except piston.utils.HttpStatusCode, e:
                     return e.response
 
+
 class HybridDetailView(ContentNegotiationMixin,
         SingleObjectTemplateResponseMixin, BaseDetailView):
     """Return an object detail view, either HTML, JSON or XML (depending on the
@@ -68,6 +73,7 @@ class HybridDetailView(ContentNegotiationMixin,
                     self, context, **kwargs)
         return response
 
+
 class HybridListView(ContentNegotiationMixin,
         MultipleObjectTemplateResponseMixin, BaseListView):
     """Return an object list view, either HTML, JSON or XML (depending on the
@@ -79,3 +85,62 @@ class HybridListView(ContentNegotiationMixin,
             response = MultipleObjectTemplateResponseMixin.render_to_response(
                     self, context, **kwargs)
         return response
+
+
+class HybridFormMixin(FormMixin):
+    def get_success_response(self, form):
+        content_type = self.request.META.get('CONTENT_TYPE')
+        if (not self.request.multipart
+                and content_type != "application/x-www-form-urlencoded"):
+            return HttpResponse(status=201)
+        else:
+            return redirect(self.get_success_url())
+
+    def form_valid(self, form):
+        return self.get_success_response(form)
+
+
+class HybridModelFormMixin(ModelFormMixin, HybridFormMixin):
+    def form_valid(self, form):
+        super(HybridModelFormMixin, self).form_valid(form)
+        return self.get_success_response(form)
+
+
+class RelatedObjectCreateMixin(BaseCreateView):
+    related_model = None
+    context_form_name = None
+
+    def get_context_form_name(self):
+        if self.context_form_name:
+            return self.context_form_name
+        else:
+            return self.related_model.__name__.lower() + "_form"
+
+    def form_invalid(self, form):
+        self.object_list = self.get_queryset()
+        return self.render_to_response(self.get_context_data(
+                **{self.get_context_form_name(): form,
+                    'object_list': self.object_list}), status=400)
+
+    def get_success_url(self):
+        """Return the URL of the parent object."""
+        return getattr(self.object, self.related_attribute).get_absolute_url()
+
+    def get_form(self, form_class):
+        # TODO this might screw up the object instance when re-rendering because
+        # of a form validation error
+        if self.request.method in ('POST', 'PUT'):
+            return form_class(data=self.request.data,
+                files=self.request.FILES,
+                initial=self.get_initial(),
+                instance=self.get_instance(),)
+        else:
+            return form_class(initial=self.get_initial(),
+                    instance=self.get_instance())
+
+class ModelPermissionCheckMixin(object):
+    def get_object(self):
+        self.object = super(ModelPermissionCheckMixin, self).get_object()
+        if not self.object.can_view(self.request.user):
+            raise PermissionDenied()
+        return self.object
