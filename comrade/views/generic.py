@@ -99,14 +99,33 @@ class HybridFormMixin(FormMixin):
     def form_valid(self, form):
         return self.get_success_response(form)
 
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form),
+                status=400)
 
-class HybridModelFormMixin(ModelFormMixin, HybridFormMixin):
+
+class HybridModelFormMixin(HybridFormMixin, ModelFormMixin):
     def form_valid(self, form):
-        super(HybridModelFormMixin, self).form_valid(form)
-        return self.get_success_response(form)
+        self.object = form.save()
+        return super(HybridModelFormMixin, self).form_valid(form)
+
+    def get_instance(self):
+        return self.get_object()
+
+    def get_form(self, form_class):
+        # TODO this might screw up the object instance when re-rendering because
+        # of a form validation error
+        if self.request.method in ('POST', 'PUT'):
+            return form_class(data=self.request.data,
+                files=self.request.FILES,
+                initial=self.get_initial(),
+                instance=self.get_instance(),)
+        else:
+            return form_class(initial=self.get_initial(),
+                    instance=self.get_instance())
 
 
-class RelatedObjectCreateMixin(BaseCreateView):
+class RelatedObjectCreateMixin(HybridModelFormMixin, BaseCreateView):
     related_model = None
     context_form_name = None
 
@@ -126,17 +145,6 @@ class RelatedObjectCreateMixin(BaseCreateView):
         """Return the URL of the parent object."""
         return getattr(self.object, self.related_attribute).get_absolute_url()
 
-    def get_form(self, form_class):
-        # TODO this might screw up the object instance when re-rendering because
-        # of a form validation error
-        if self.request.method in ('POST', 'PUT'):
-            return form_class(data=self.request.data,
-                files=self.request.FILES,
-                initial=self.get_initial(),
-                instance=self.get_instance(),)
-        else:
-            return form_class(initial=self.get_initial(),
-                    instance=self.get_instance())
 
 class ModelPermissionCheckMixin(object):
     def get_object(self):
