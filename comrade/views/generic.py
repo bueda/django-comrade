@@ -28,14 +28,13 @@ else:
 
 class ContentNegotiationMixin(object):
     """Requires the AcceptMiddleware to be enabled."""
-    def _determine_accepted_types(self, request):
-        type_html = "text/html"
-        if type_html in request.accepted_types:
-            return []
-        return request.accepted_types
 
     api_context_include_keys = set()
     api_context_exclude_keys = set()
+    fields = ()
+
+    def get_fields(self):
+        return self.fields
 
     def get_minimal_context_keys(self, context):
         """Returns keys in this order if they are defined: include_keys,
@@ -72,7 +71,8 @@ class ContentNegotiationMixin(object):
             except ValueError:
                 pass
             else:
-                srl = emitter(self.get_api_context_data(context), {}, None)
+                srl = emitter(self.get_api_context_data(context), {}, None,
+                        self.fields)
                 try:
                     stream = srl.render(self.request)
                     if not isinstance(stream, HttpResponse):
@@ -82,6 +82,13 @@ class ContentNegotiationMixin(object):
                     return response
                 except piston.utils.HttpStatusCode, e:
                     return e.response
+
+    def _determine_accepted_types(self, request):
+        type_html = "text/html"
+        if type_html in request.accepted_types:
+            return []
+        return request.accepted_types
+
 
 
 class HybridDetailView(ContentNegotiationMixin,
