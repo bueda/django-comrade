@@ -9,9 +9,8 @@ def generate_key():
     key = key.rstrip('==')
     return key
 
-# By Ned Batchelder.
 def chunked(seq, n):
-    """
+    """By Ned Batchelder.
     Yield successive n-sized chunks from seq.
 
     >>> for group in chunked(range(8), 3):
@@ -35,3 +34,11 @@ def find_dict_key(dictionary, search_value):
     for key, value in dictionary.iteritems():
         if value == search_value:
             return key
+
+def extract(dictionary, keys):
+    """Returns a new dictionary with only the keys from the dictionary passed in
+    specified in the keys list.
+    
+    """
+    return dict((key, dictionary[key]) for key in keys if key in dictionary)
+

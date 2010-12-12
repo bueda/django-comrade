@@ -8,6 +8,8 @@ from django.views.generic.edit import (BaseFormView, BaseCreateView, FormMixin,
 from django.views.generic.detail import (BaseDetailView,
         SingleObjectTemplateResponseMixin)
 
+from comrade.utils import extract
+
 try:
     # Import Piston if it's installed, but don't die if it's not here. Only a
     # limited number of Middleware require it.
@@ -31,7 +33,30 @@ class ContentNegotiationMixin(object):
         if type_html in request.accepted_types:
             return []
         return request.accepted_types
-        
+
+    api_context_include_keys = set()
+    api_context_exclude_keys = set()
+
+    def get_minimal_context_keys(self, context):
+        """Returns keys in this order if they are defined: include_keys,
+        exclude_keys, original keys. Currently there is no way to use both
+        include and exclude.
+        """
+        if self.api_context_include_keys:
+            return self.api_context_include_keys
+        elif self.api_context_exclude_keys:
+            return set(context.keys()) - self.api_context_exclude_keys
+        else:
+            return context.keys()
+
+    def get_minimal_context(self, context):
+        # TODO this does some extra work if we we want to include all keys -
+        # essentially rebuilds the same dict
+        return extract(context, self.get_minimal_context_keys(context))
+
+    def get_api_context_data(self, context):
+        return self.get_minimal_context(context)
+
     def get_api_response(self, context, **kwargs):
         """If the HttpRequest has something besides text/html in its ACCEPT
         header, try and serialize the context and return an HttpResponse.
@@ -40,8 +65,6 @@ class ContentNegotiationMixin(object):
 
         Uses Piston's Emitter utility, so Piston is a requirement for now.
         """
-        # Look for a 'format=json' GET argument or CONTENT-TYPE of
-        # application/json
         accepted_types = self._determine_accepted_types(self.request)
         for accepted_type in accepted_types:
             try:
@@ -49,7 +72,7 @@ class ContentNegotiationMixin(object):
             except ValueError:
                 pass
             else:
-                srl = emitter(context, {}, None)
+                srl = emitter(self.get_api_context_data(context), {}, None)
                 try:
                     stream = srl.render(self.request)
                     if not isinstance(stream, HttpResponse):
@@ -79,6 +102,9 @@ class HybridListView(ContentNegotiationMixin,
     """Return an object list view, either HTML, JSON or XML (depending on the
     ACCEPT HTTP header or ?format=x query parameter.
     """
+    api_context_exclude_keys = set(['paginator', 'page_obj', 'is_paginated',
+            'object_list',])
+
     def render_to_response(self, context, **kwargs):
         response = self.get_api_response(context, **kwargs)
         if not response:
