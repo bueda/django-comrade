@@ -111,6 +111,8 @@ class POSTDataMassageMiddleware(object):
     """Middleware to take all POST data - whether JSON, form encoded fields,
     XML, etc. and store it in the `data` attribute on the request.
 
+    Sets `request.multipart` to True if content_type is multipart.
+
     Requires django-piston.
     """
     def process_request(self, request):
@@ -119,6 +121,8 @@ class POSTDataMassageMiddleware(object):
                 piston.utils.translate_mime(request)
             except piston.utils.MimerDataException:
                 return rc.BAD_REQUEST
+            else:
+                request.multipart = piston.utils.Mimer(request).is_multipart()
             if not hasattr(request, 'data'):
                 if request.method == 'POST':
                     request.data = request.POST
