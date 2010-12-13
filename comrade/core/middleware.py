@@ -19,6 +19,7 @@ except ImportError:
     pass
 
 from comrade.views.simple import direct_to_template
+from comrade.core.router import coerce_put_post
 
 import logging
 logger = logging.getLogger(__name__)
@@ -36,6 +37,8 @@ class HttpMethodsMiddleware(object):
         if request.POST and request.POST.has_key(_MIDDLEWARE_KEY):
             if request.POST[_MIDDLEWARE_KEY].upper() in _SUPPORTED_TRANSFORMS:
                 request.method = request.POST[_MIDDLEWARE_KEY].upper()
+
+        coerce_put_post(request)
         return None
            
     def process_response(self, request, response):
@@ -126,7 +129,7 @@ class POSTDataMassageMiddleware(object):
             if not hasattr(request, 'data'):
                 if request.method == 'POST':
                     request.data = request.POST
-                else:
+                elif request.method == 'PUT':
                     request.data = request.PUT
 
 

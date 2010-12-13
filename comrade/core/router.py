@@ -1,6 +1,6 @@
 from django.http import Http404, HttpResponseNotAllowed
 
-def _coerce_put_post(request):
+def coerce_put_post(request):
     """
     Django doesn't particularly understand REST.
     In case we send data over PUT, Django won't
@@ -9,6 +9,8 @@ def _coerce_put_post(request):
     
     The try/except abominiation here is due to a bug
     in mod_python. This should fix it.
+
+    This is borrowed from django-piston.
     """
     if request.method == "PUT":
         # Bug fix: if _load_post_and_files has already been called, for
@@ -50,7 +52,7 @@ class RestfulResource:
 
     def __call__(self, request, *args, **kwargs):
 
-        _coerce_put_post(request)
+        coerce_put_post(request)
 
         if request.method in self.http_methods:
             handler_method = _get_handler_method(self, request.method)
