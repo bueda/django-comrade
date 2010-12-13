@@ -56,6 +56,11 @@ class BaseTest(test.TestCase):
         if value is not None:
             eq_(data[key], value)
 
+    def assertRedirectsPermanently(self, response, expected_url,
+            status_code=301, target_status_code=200, msg_prefix=''):
+        return self.assertRedirects(response, expected_url, status_code,
+                target_status_code, msg_prefix)
+
 
 class BaseModelTest(BaseTest):
     def setUp(self, instance=None):
