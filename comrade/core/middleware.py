@@ -1,8 +1,6 @@
 from django.conf import settings
-from django.http import (HttpResponsePermanentRedirect, get_host,
-        HttpResponseRedirect)
+from django.http import (HttpResponsePermanentRedirect, get_host)
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
 from django.contrib.auth.views import redirect_to_login
 
 import re
@@ -13,12 +11,11 @@ try:
     # limited number of Middleware require it.
     import piston.utils
     
+    
     # Importing this registers translators for the MimeTypes we are using.
-    import piston.emitters
 except ImportError:
     pass
 
-from comrade.views.simple import direct_to_template
 from comrade.core.router import coerce_put_post
 
 import logging
@@ -123,7 +120,7 @@ class POSTDataMassageMiddleware(object):
             try:
                 piston.utils.translate_mime(request)
             except piston.utils.MimerDataException:
-                return rc.BAD_REQUEST
+                return piston.utils.rc.BAD_REQUEST
             else:
                 request.multipart = piston.utils.Mimer(request).is_multipart()
             if not hasattr(request, 'data'):
