@@ -10,9 +10,9 @@ try:
     # Import Piston if it's installed, but don't die if it's not here. Only a
     # limited number of Middleware require it.
     import piston.utils
-    
-    
+
     # Importing this registers translators for the MimeTypes we are using.
+    import piston.emitters
 except ImportError:
     pass
 
@@ -22,13 +22,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-_HTML_TYPES = ('text/html', 'application/xhtml+xml')    
+_HTML_TYPES = ('text/html', 'application/xhtml+xml')
 _SUPPORTED_TRANSFORMS = ['PUT', 'DELETE']
 _FORM_RE = re.compile(r'((<form\W[^>]*\bmethod=(\'|"|))(%s)((\'|"|)\b[^>]*>))'
         % '|'.join(_SUPPORTED_TRANSFORMS), re.IGNORECASE)
 _MIDDLEWARE_KEY = '_method'
 SSL = 'SSL'
- 
+
 class HttpMethodsMiddleware(object):
     def process_request(self, request):
         if request.POST and request.POST.has_key(_MIDDLEWARE_KEY):
@@ -37,11 +37,11 @@ class HttpMethodsMiddleware(object):
 
         coerce_put_post(request)
         return None
-           
+
     def process_response(self, request, response):
         if response['Content-Type'].split(';')[0] in _HTML_TYPES:
             # ensure we don't add the 'id' attribute twice (HTML validity)
-            idattributes = itertools.chain(("id='" + _MIDDLEWARE_KEY + "'",), 
+            idattributes = itertools.chain(("id='" + _MIDDLEWARE_KEY + "'",),
                                             itertools.repeat(''))
             def add_transform_field(match):
                 """Returns the matched <form> tag with a modified method and
@@ -101,7 +101,7 @@ class PermissionRedirectMiddleware(object):
     This middleware will not be required as soon as this patch lands in Django:
     http://code.djangoproject.com/ticket/13850 - after that we can just define a
     customer 403 handler that redirects instead of renders.
-    
+
     """
     def process_exception(self, request, exception):
         if isinstance(exception, PermissionDenied):
