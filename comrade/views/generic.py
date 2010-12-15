@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.core import serializers
+from django.core.exceptions import PermissionDenied
 from django.views.generic.list import (BaseListView,
         MultipleObjectTemplateResponseMixin)
 from django.views.generic.edit import (BaseFormView, BaseCreateView, FormMixin,
@@ -183,5 +184,5 @@ class ModelPermissionCheckMixin(object):
     def get_object(self):
         self.object = super(ModelPermissionCheckMixin, self).get_object()
         if not self.object.can_view(self.request.user):
-            raise PermissionDenied()
+            raise PermissionDenied
         return self.object
