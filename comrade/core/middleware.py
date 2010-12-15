@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.http import (HttpResponsePermanentRedirect, get_host)
+from django.http import HttpResponsePermanentRedirect, get_host, HttpResponse
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.views import redirect_to_login
 
@@ -105,7 +105,11 @@ class PermissionRedirectMiddleware(object):
     """
     def process_exception(self, request, exception):
         if isinstance(exception, PermissionDenied):
-            return redirect_to_login(request.path)
+            # TODO this likely needs to be much, much smarter
+            if 'json' in request.accepted_types[0]:
+                return HttpResponse(status=401)
+            else:
+                return redirect_to_login(request.path)
 
 class POSTDataMassageMiddleware(object):
     """Middleware to take all POST data - whether JSON, form encoded fields,
