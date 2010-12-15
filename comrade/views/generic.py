@@ -183,6 +183,6 @@ class RelatedObjectCreateMixin(HybridModelFormMixin, BaseCreateView):
 class ModelPermissionCheckMixin(object):
     def get_object(self):
         self.object = super(ModelPermissionCheckMixin, self).get_object()
-        if not self.object.can_view(self.request.user):
+        if not self.object.can_view(self.request.user, request=self.request):
             raise PermissionDenied
         return self.object
