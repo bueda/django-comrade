@@ -181,8 +181,20 @@ class RelatedObjectCreateMixin(HybridModelFormMixin, BaseCreateView):
 
 
 class ModelPermissionCheckMixin(object):
+    permission_methods = {
+        'GET': 'can_view',
+        'POST': 'can_edit',
+        'PUT': 'can_edit',
+        'DELETE': 'can_delete',
+    }
+
+    def get_permission_function(self, http_method=None):
+        return getattr(self.object,
+                self.permission_methods[http_method or self.request.method])
+
     def get_object(self):
         self.object = super(ModelPermissionCheckMixin, self).get_object()
-        if not self.object.can_view(self.request.user, request=self.request):
+        if not self.get_permission_function()(self.request.user,
+                request=self.request):
             raise PermissionDenied
         return self.object
