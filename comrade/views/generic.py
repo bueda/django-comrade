@@ -126,7 +126,10 @@ class HybridFormMixin(FormMixin):
         content_type = self.request.META.get('CONTENT_TYPE')
         if (not self.request.multipart
                 and content_type != "application/x-www-form-urlencoded"):
-            return HttpResponse(status=201)
+            if self.request.method == "POST":
+                return HttpResponse(status=201)
+            else:
+                return HttpResponse(status=200)
         else:
             return redirect(self.get_success_url())
 
