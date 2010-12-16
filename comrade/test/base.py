@@ -29,12 +29,16 @@ class BaseTest(test.TestCase):
         self.client.logout()
         self._test_unauthorized(method, url, next_url, allowed)
 
-    def _test_unauthorized(self, method, url, next_url=None, allowed=False):
+    def _test_unauthorized(self, method, url, next_url=None, allowed=False,
+            authenticated=False):
         response = method(url)
         if not allowed:
-            self.assertRedirects(response,
-                    (next_url or reverse('account:login')) +
-                    '?' + REDIRECT_FIELD_NAME + '=' + url)
+            if authenticated:
+                eq_(response.status_code, 403)
+            else:
+                self.assertRedirects(response,
+                        (next_url or reverse('account:login')) +
+                        '?' + REDIRECT_FIELD_NAME + '=' + url)
         else:
             eq_(response.status_code, 200)
 

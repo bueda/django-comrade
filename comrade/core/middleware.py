@@ -1,5 +1,6 @@
 from django.conf import settings
-from django.http import HttpResponsePermanentRedirect, get_host, HttpResponse
+from django.http import (HttpResponsePermanentRedirect, get_host, HttpResponse,
+        HttpResponseForbidden)
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.views import redirect_to_login
 
@@ -108,6 +109,8 @@ class PermissionRedirectMiddleware(object):
             # TODO this likely needs to be much, much smarter
             if 'json' in request.accepted_types[0]:
                 return HttpResponse(status=401)
+            elif request.user.is_authenticated():
+                return HttpResponseForbidden()
             else:
                 return redirect_to_login(request.path)
 
