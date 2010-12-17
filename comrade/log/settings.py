@@ -1,6 +1,14 @@
 import logging, logging.handlers
 import os.path
 import types
+import sys
+import time
+
+# For pretty log messages, if available
+try:
+    import curses
+except:
+    curses = None
 
 from comrade.log import dictconfig
 
@@ -32,6 +40,44 @@ class UTF8SafeFormatter(RemoteAddressFormatter):
             t = t.encode(self.encoding, 'replace')
         return t
 
+class ColorizedUTF8SafeFormatter(UTF8SafeFormatter):
+    def __init__(self, *args, **kwargs):
+        UTF8SafeFormatter.__init__(self, *args, **kwargs)
+
+        if curses and sys.stderr.isatty():
+            try:
+                curses.setupterm()
+                if curses.tigetnum("colors") > 0:
+                    color = True
+            except:
+                pass
+            else:
+                fg_color = curses.tigetstr("setaf") or curses.tigetstr("setf") or ""
+                self._colors = {
+                    logging.DEBUG: curses.tparm(fg_color, 4), # Blue
+                    logging.INFO: curses.tparm(fg_color, 2), # Green
+                    logging.WARNING: curses.tparm(fg_color, 3), # Yellow
+                    logging.ERROR: curses.tparm(fg_color, 1), # Red
+                }
+                self._normal = curses.tigetstr("sgr0")
+
+    def format(self, record):
+        message = UTF8SafeFormatter.format(self, record)
+        record.asctime = time.strftime(
+            "%y%m%d %H:%M:%S", self.converter(record.created))
+        prefix = '[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d]' % \
+            record.__dict__
+        if hasattr(self, '_colors'):
+            prefix = (self._colors.get(record.levelno, self._normal) +
+                        prefix + self._normal)
+        formatted = prefix + " " + message
+        if record.exc_info:
+            if not record.exc_text:
+                record.exc_text = self.formatException(record.exc_info)
+        if record.exc_text:
+            formatted = formatted.rstrip() + "\n" + record.exc_text
+        return formatted.replace("\n", "\n    ")
+
 class NullHandler(logging.Handler):
     def emit(self, record):
         pass
@@ -43,16 +89,14 @@ def initialize_logging(syslog_tag, syslog_facility, loggers,
     elif os.path.exists('/var/run/syslog'):
         syslog_device = '/var/run/syslog'
 
-    base_fmt = ('%(name)s:%(levelname)s %(message)s:%(pathname)s:%(lineno)s')
+    base_fmt = ('%(name)s:%(levelname)s %(message)s')
 
     cfg = {
         'version': 1,
         'filters': {},
         'formatters': {
             'debug': {
-                '()': UTF8SafeFormatter,
-                'datefmt': '%H:%M:%s',
-                'format': '%(asctime)s ' + base_fmt,
+                '()': ColorizedUTF8SafeFormatter,
             },
             'prod': {
                 '()': UTF8SafeFormatter,
