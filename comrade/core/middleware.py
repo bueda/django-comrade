@@ -17,7 +17,7 @@ try:
 except ImportError:
     pass
 
-from comrade.core.router import coerce_put_post
+from comrade.http import coerce_put_post
 
 import logging
 logger = logging.getLogger(__name__)
