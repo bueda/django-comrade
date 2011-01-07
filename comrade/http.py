@@ -33,6 +33,7 @@ def coerce_put_post(request):
         if hasattr(request, '_post'):
             del request._post
             del request._files
+        request._read_started = False
 
         try:
             request.method = "POST"
