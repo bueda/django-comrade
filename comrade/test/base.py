@@ -70,6 +70,9 @@ class BaseTest(test.TestCase):
     def assertDelivered(self, *args, **kwargs):
         return delivered(*args, **kwargs)
 
+    def assertNotDelivered(self, *args, **kwargs):
+        return not self.assertDelivered(*args, **kwargs)
+
 
 class BaseModelTest(BaseTest):
     def setUp(self, instance=None):
