@@ -8,6 +8,8 @@ from nose.tools import eq_, ok_
 import json
 import mockito
 
+from comrade.test.utils import delivered
+
 class BaseTest(test.TestCase):
     fixtures = ['dev']
 
@@ -64,6 +66,9 @@ class BaseTest(test.TestCase):
             status_code=301, target_status_code=200, msg_prefix=''):
         return self.assertRedirects(response, expected_url, status_code,
                 target_status_code, msg_prefix)
+
+    def assertDelivered(self, *args, **kwargs):
+        return delivered(*args, **kwargs)
 
 
 class BaseModelTest(BaseTest):
