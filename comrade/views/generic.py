@@ -121,11 +121,15 @@ class HybridListView(ContentNegotiationMixin,
         return response
 
 
-class HybridFormMixin(FormMixin):
-    def get_success_response(self, form):
-        content_type = self.request.META.get('CONTENT_TYPE')
-        if (not self.request.multipart
-                and content_type != "application/x-www-form-urlencoded"):
+class HybridEditMixin(object):
+    def get_success_response(self, form=None):
+        content_type = self.request.META.get('CONTENT_TYPE', '')
+        accept_type = self.request.META.get('HTTP_ACCEPT', '')
+        api_call = False
+        for api_content_type in ['json', 'xml']:
+            api_call = (api_call or api_content_type in content_type or
+                    api_content_type in accept_type)
+        if api_call:
             if self.request.method == "POST":
                 return HttpResponse(status=201)
             else:
@@ -133,6 +137,8 @@ class HybridFormMixin(FormMixin):
         else:
             return redirect(self.get_success_url())
 
+
+class HybridFormMixin(HybridEditMixin, FormMixin):
     def form_valid(self, form):
         return self.get_success_response(form)
 
