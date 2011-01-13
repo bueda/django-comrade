@@ -125,10 +125,8 @@ class HybridEditMixin(object):
     def get_success_response(self, form=None):
         content_type = self.request.META.get('CONTENT_TYPE', '')
         accept_type = self.request.META.get('HTTP_ACCEPT', '')
-        api_call = False
-        for api_content_type in ['json', 'xml']:
-            api_call = (api_call or api_content_type in content_type or
-                    api_content_type in accept_type)
+        api_call = (accept_type and 'text/html' not in accept_type
+                or 'application/json' in content_type)
         if api_call:
             if self.request.method == "POST":
                 return HttpResponse(status=201)
