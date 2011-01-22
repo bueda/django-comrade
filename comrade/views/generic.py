@@ -156,6 +156,7 @@ class HybridModelFormMixin(HybridFormMixin, ModelFormMixin):
     def get_form(self, form_class):
         # TODO this might screw up the object instance when re-rendering because
         # of a form validation error
+        # TODO this can probably be moved to get_form_kwargs
         if self.request.method in ('POST', 'PUT'):
             return form_class(data=self.request.data,
                 files=self.request.FILES,
