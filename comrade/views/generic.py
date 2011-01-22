@@ -5,7 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic.list import (BaseListView,
         MultipleObjectTemplateResponseMixin)
 from django.views.generic.edit import (BaseFormView, BaseCreateView, FormMixin,
-        ModelFormMixin)
+        ModelFormMixin, ProcessFormView)
 from django.views.generic.detail import (BaseDetailView,
         SingleObjectTemplateResponseMixin)
 
@@ -167,7 +167,7 @@ class HybridModelFormMixin(HybridFormMixin, ModelFormMixin):
                     instance=self.get_instance())
 
 
-class RelatedObjectCreateMixin(HybridModelFormMixin, BaseCreateView):
+class RelatedObjectCreateMixin(HybridFormMixin, ProcessFormView):
     related_model = None
     context_form_name = None
 
