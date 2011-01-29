@@ -78,12 +78,19 @@ class ColorizedUTF8SafeFormatter(UTF8SafeFormatter):
             formatted = formatted.rstrip() + "\n" + record.exc_text
         return formatted.replace("\n", "\n    ")
 
+
 class NullHandler(logging.Handler):
     def emit(self, record):
         pass
 
-def initialize_logging(syslog_tag, syslog_facility, loggers,
-        log_level=logging.INFO, use_syslog=False):
+
+def initialize_logging(log_config):
+    use_syslog = log_config.pop('use_syslog', False)
+    log_level = log_config.pop('log_level', logging.INFO)
+    syslog_tag = log_config.pop('syslog_tag')
+    syslog_facility = log_config.pop('syslog_facility',
+            logging.handlers.SysLogHandler.LOG_LOCAL0)
+
     if os.path.exists('/dev/log'):
         syslog_device = '/dev/log'
     elif os.path.exists('/var/run/syslog'):
@@ -127,7 +134,7 @@ def initialize_logging(syslog_tag, syslog_facility, loggers,
         }
     }
 
-    for key, value in loggers.items():
+    for key, value in log_config.items():
         cfg[key].update(value)
 
     # Set the level and handlers for all loggers.
