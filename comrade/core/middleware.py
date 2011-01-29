@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.http import (HttpResponsePermanentRedirect, get_host, HttpResponse,
-        HttpResponseForbidden)
+        HttpResponseForbidden, Http404)
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.views import redirect_to_login
 
@@ -113,6 +113,13 @@ class PermissionRedirectMiddleware(object):
                 return HttpResponseForbidden()
             else:
                 return redirect_to_login(request.path)
+
+
+class ExceptionLoggingMiddlware(object):
+    def process_exception(self, request, exception):
+        if not isinstance(exception, Http404):
+            logger.exception("Unhandled exception:")
+
 
 class POSTDataMassageMiddleware(object):
     """Middleware to take all POST data - whether JSON, form encoded fields,
