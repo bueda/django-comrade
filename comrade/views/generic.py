@@ -1,13 +1,14 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import redirect
 from django.core import serializers
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import (PermissionDenied, ValidationError,
+        ObjectDoesNotExist)
 from django.views.generic.list import (BaseListView,
         MultipleObjectTemplateResponseMixin)
 from django.views.generic.edit import (BaseFormView, BaseCreateView, FormMixin,
         ModelFormMixin, ProcessFormView)
 from django.views.generic.detail import (BaseDetailView,
-        SingleObjectTemplateResponseMixin)
+        SingleObjectTemplateResponseMixin, SingleObjectMixin)
 
 from comrade.utils import extract
 
@@ -15,7 +16,7 @@ try:
     # Import Piston if it's installed, but don't die if it's not here. Only a
     # limited number of Middleware require it.
     import piston.utils
-    
+
     # Importing this registers translators for the MimeTypes we are using.
     import piston.emitters
 except ImportError:
@@ -91,9 +92,55 @@ class ContentNegotiationMixin(object):
         return request.accepted_types
 
 
+class PKSafeSingleObjectMixin(SingleObjectMixin):
+    def get_object(self, queryset=None):
+        """
+        Returns the object the view is displaying.
+
+        By default this requires `self.queryset` and a `pk` or `slug` argument
+        in the URLconf, but subclasses can override this to return any object.
+
+        Tries to convert the primary key value provided to the proper type.
+        """
+        # Use a custom queryset if provided; this is required for subclasses
+        # like DateDetailView
+        if queryset is None:
+            queryset = self.get_queryset()
+
+        # Next, try looking up by primary key.
+        pk = self.kwargs.get('pk', None)
+        if pk is None:
+            pk = self.kwargs.get(queryset.model.__name__.lower() + '_pk', None)
+        pk = queryset.model._meta.pk.to_python(pk)
+        slug = self.kwargs.get('slug', None)
+        if pk is not None:
+            queryset = queryset.filter(pk=pk)
+
+        # Next, try looking up by slug.
+        elif slug is not None:
+            slug_field = self.get_slug_field()
+            queryset = queryset.filter(**{slug_field: slug})
+
+        # If none of those are defined, it's an error.
+        else:
+            raise AttributeError(u"Generic detail view %s must be called with "
+                                 u"either an object id or a slug."
+                                 % self.__class__.__name__)
+
+        try:
+            obj = queryset.get()
+        except ObjectDoesNotExist, ValidationError:
+            raise Http404(u"No %s found matching the query" %
+                          (queryset.model._meta.verbose_name))
+        return obj
+
+
+class PKSafeBaseDetailView(PKSafeSingleObjectMixin, BaseDetailView):
+    pass
+
 
 class HybridDetailView(ContentNegotiationMixin,
-        SingleObjectTemplateResponseMixin, BaseDetailView):
+        SingleObjectTemplateResponseMixin, PKSafeBaseDetailView):
     """Return an object detail view, either HTML, JSON or XML (depending on the
     ACCEPT HTTP header or ?format=x query parameter.
     """
