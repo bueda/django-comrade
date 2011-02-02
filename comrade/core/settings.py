@@ -60,7 +60,7 @@ else:
     CACHE_BACKEND = ('memcached://127.0.0.1:11211/?timeout=%(CACHE_TIMEOUT)d'
             '&max_entries=%(MAX_CACHE_ENTRIES)d' % locals())
 
-DEFAULT_FROM_EMAIL = "Bueda Support <support@bueda.com>"
+DEFAULT_FROM_EMAIL = "Bueda <support@bueda.com>"
 SERVER_EMAIL = "Bueda Operations <ops@bueda.com>"
 
 CONTACT_EMAIL = 'support@bueda.com'
