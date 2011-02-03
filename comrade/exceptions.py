@@ -16,7 +16,7 @@ class ComradeError(Exception):
         self.name = 'General Error'
 
     def __unicode__(self):
-        return '%s(%s)' % (self.name, self.reason)
+        return u'%s(%s)' % (self.name, self.reason)
 
     def __repr__(self):
         return self.__unicode__()
@@ -37,5 +37,5 @@ class HttpResponseError(ComradeError):
         self.response = response
 
     def __unicode__(self):
-        return '%s(%s, URL: %s, Response: %s)' % (self.name, self.reason,
+        return u'%s(%s, URL: %s, Response: %s)' % (self.name, self.reason,
                 self.url, self.response)
