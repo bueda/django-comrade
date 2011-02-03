@@ -5,7 +5,7 @@ from django.conf import settings
 import logging
 logger = logging.getLogger(__name__)
 
-def status(request):
+def status(request, **kwargs):
     logger.debug("Responding to status check")
     return HttpResponse()
 
@@ -19,7 +19,7 @@ def maintenance_mode(request, template_name='503.html'):
     t = loader.get_template(template_name)
     return HttpResponseTemporaryUnavailable(t.render(RequestContext(request)))
 
-def version(request, version_attribute='GIT_COMMIT'):
+def version(request, version_attribute='GIT_COMMIT', **kwargs):
     return HttpResponse(getattr(settings, version_attribute))
 
 def direct_to_template(request, template, extra_context=None, mimetype=None,
