@@ -61,7 +61,7 @@ class HttpMethodsMiddleware(object):
 
 class SslRedirectMiddleware(object):
     def process_view(self, request, view_func, view_args, view_kwargs):
-        secure = view_kwargs.pop(SSL, False)
+        secure = view_kwargs.pop(SSL, True)
         if settings.SSL_ENABLED and secure != request.is_secure():
             return self._redirect(request, secure)
 
