@@ -59,7 +59,7 @@ class HttpMethodsMiddleware(object):
         return response
 
 
-class ForwadedSSLMiddleware(object):
+class ForwardedSSLMiddleware(object):
     def process_request(self, request):
         request.is_secure = lambda: request.META.get(
                 'HTTP_X_FORWARDED_PROTO') == 'https'
