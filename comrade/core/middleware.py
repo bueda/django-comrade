@@ -84,7 +84,8 @@ class SslRedirectMiddleware(object):
 
 class ArgumentLogMiddleware(object):
     ignored_modules = ['debug_toolbar.views',
-            'django.views.static',]
+            'django.views.static',
+            'django.contrib.staticfiles.views']
 
     def process_view(self, request, view, args, kwargs):
         if hasattr(view, '__name__'):
