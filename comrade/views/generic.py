@@ -248,8 +248,9 @@ class ModelPermissionCheckMixin(object):
                 self.permission_methods[http_method or self.request.method])
 
     def get_object(self):
-        self.object = super(ModelPermissionCheckMixin, self).get_object()
-        if not self.get_permission_function()(self.request.user,
-                request=self.request):
-            raise PermissionDenied
+        if not getattr(self, 'object', None) or not self.object:
+            self.object = super(ModelPermissionCheckMixin, self).get_object()
+            if not self.get_permission_function()(self.request.user,
+                    request=self.request):
+                raise PermissionDenied
         return self.object
