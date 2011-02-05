@@ -18,6 +18,7 @@ except ImportError:
     pass
 
 from comrade.http import coerce_put_post
+from comrade.views.simple import direct_to_template
 
 import logging
 logger = logging.getLogger(__name__)
@@ -106,10 +107,6 @@ class PermissionRedirectMiddleware(object):
     method simple raise a PermissionDenied instead of needing the check if
     helper methods return an HttpResponse.
 
-    This middleware will not be required as soon as this patch lands in Django:
-    http://code.djangoproject.com/ticket/13850 - after that we can just define a
-    customer 403 handler that redirects instead of renders.
-
     """
     def process_exception(self, request, exception):
         if isinstance(exception, PermissionDenied):
@@ -117,7 +114,7 @@ class PermissionRedirectMiddleware(object):
             if 'json' in request.accepted_types[0]:
                 return HttpResponse(status=401)
             elif request.user.is_authenticated():
-                return HttpResponseForbidden()
+                return direct_to_template(request, "403.html", status=403)
             else:
                 return redirect_to_login(request.path)
 
