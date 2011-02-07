@@ -6,7 +6,7 @@ from django.core.exceptions import (PermissionDenied, ValidationError,
 from django.views.generic.list import (BaseListView,
         MultipleObjectTemplateResponseMixin)
 from django.views.generic.edit import (BaseFormView, BaseCreateView, FormMixin,
-        ModelFormMixin, ProcessFormView)
+        ModelFormMixin, ProcessFormView, BaseDeleteView)
 from django.views.generic.detail import (BaseDetailView,
         SingleObjectTemplateResponseMixin, SingleObjectMixin)
 
@@ -138,6 +138,8 @@ class PKSafeSingleObjectMixin(SingleObjectMixin):
 class PKSafeBaseDetailView(PKSafeSingleObjectMixin, BaseDetailView):
     pass
 
+class PKSafeBaseDeleteView(PKSafeSingleObjectMixin, BaseDeleteView):
+    pass
 
 class HybridDetailView(ContentNegotiationMixin,
         SingleObjectTemplateResponseMixin, PKSafeBaseDetailView):
