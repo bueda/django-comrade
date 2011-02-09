@@ -87,8 +87,14 @@ class ContentNegotiationMixin(object):
                     return e.response
 
     def _determine_accepted_types(self, request):
-        type_html = "text/html"
-        if type_html in request.accepted_types:
+        """
+        Assume this request will accept HTML if it either explicitly requests
+        it, or if it's IE and it's just giving us '*/*' as this isn't the
+        first request of the session.
+
+        """
+        if ("text/html" in request.accepted_types
+                or request.accepted_types == ['*/*']):
             return []
         return request.accepted_types
 
@@ -169,8 +175,12 @@ class HybridEditMixin(object):
     def get_success_response(self, form=None):
         content_type = self.request.META.get('CONTENT_TYPE', '')
         accept_type = self.request.META.get('HTTP_ACCEPT', '')
-        api_call = (accept_type and 'text/html' not in accept_type
-                or 'application/json' in content_type)
+        # TODO expand this to include XML when neccessary. Can't just look for
+        # *not* text/html because IE will send '*/*' for HTTP_ACCEPT in
+        # everything after the first request for a session.
+        api_call = ('text/html' not in accept_type and
+                'application/json' in accept_type or 'application/json'
+                    in content_type)
         if api_call:
             if self.request.method == "POST":
                 return HttpResponse(status=201)
