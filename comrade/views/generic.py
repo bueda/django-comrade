@@ -6,7 +6,8 @@ from django.core.exceptions import (PermissionDenied, ValidationError,
 from django.views.generic.list import (BaseListView,
         MultipleObjectTemplateResponseMixin)
 from django.views.generic.edit import (BaseFormView, BaseCreateView, FormMixin,
-        ModelFormMixin, ProcessFormView, BaseDeleteView)
+        ModelFormMixin, ProcessFormView, BaseDeleteView, DeletionMixin,
+        UpdateView)
 from django.views.generic.detail import (BaseDetailView,
         SingleObjectTemplateResponseMixin, SingleObjectMixin)
 
@@ -92,7 +93,7 @@ class ContentNegotiationMixin(object):
         return request.accepted_types
 
 
-class PKSafeSingleObjectMixin(SingleObjectMixin):
+class PKSafeSingleObjectMixin(object):
     def get_object(self, queryset=None):
         """
         Returns the object the view is displaying.
@@ -135,14 +136,8 @@ class PKSafeSingleObjectMixin(SingleObjectMixin):
         return obj
 
 
-class PKSafeBaseDetailView(PKSafeSingleObjectMixin, BaseDetailView):
-    pass
-
-class PKSafeBaseDeleteView(PKSafeSingleObjectMixin, BaseDeleteView):
-    pass
-
-class HybridDetailView(ContentNegotiationMixin,
-        SingleObjectTemplateResponseMixin, PKSafeBaseDetailView):
+class HybridDetailView(PKSafeSingleObjectMixin, ContentNegotiationMixin,
+        SingleObjectTemplateResponseMixin, BaseDetailView):
     """Return an object detail view, either HTML, JSON or XML (depending on the
     ACCEPT HTTP header or ?format=x query parameter.
     """
@@ -154,7 +149,7 @@ class HybridDetailView(ContentNegotiationMixin,
         return response
 
 
-class HybridListView(ContentNegotiationMixin,
+class HybridListView(PKSafeSingleObjectMixin, ContentNegotiationMixin,
         MultipleObjectTemplateResponseMixin, BaseListView):
     """Return an object list view, either HTML, JSON or XML (depending on the
     ACCEPT HTTP header or ?format=x query parameter.
@@ -214,6 +209,14 @@ class HybridModelFormMixin(HybridFormMixin, ModelFormMixin):
         else:
             return form_class(initial=self.get_initial(),
                     instance=self.get_instance())
+
+
+class HybridUpdateView(PKSafeSingleObjectMixin, HybridModelFormMixin,
+        UpdateView):
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.delete()
+        return self.get_success_response(None)
 
 
 class RelatedObjectCreateMixin(HybridFormMixin, ProcessFormView):
