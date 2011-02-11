@@ -28,6 +28,9 @@ class SignatureStripTest(unittest2.TestCase):
     def test_standard_missing_space_signature(self):
         self._check_for_signature("--\n")
 
+    def test_carriage_return(self):
+        self._check_for_signature("--\r\n")
+
     def test_iphone(self):
         self._check_for_signature("Sent from my iPhone")
 
@@ -50,6 +53,7 @@ class QuotedStripTest(unittest2.TestCase):
         ok_(result.startswith(self.prefix[0:-1]))
         ok_(self.postfix not in result)
         ok_(quoted not in result)
+        return result
 
     def test_outlook(self):
         self._check_for_quoted("-----Original Message-----")
@@ -64,4 +68,10 @@ class QuotedStripTest(unittest2.TestCase):
         self._check_for_quoted("From: Bob")
 
     def test_multiple(self):
-        self._check_for_quoted("On Tuesday Sue wrote:\n> Something\n")
+        result = self._check_for_quoted("On Tuesday Sue wrote:\n> Something\n")
+        ok_("Tuesday" not in result)
+
+    def test_carriage_return(self):
+        result = self._check_for_quoted(
+                "On Tuesday Sue wrote:\r\n> Something\n")
+        ok_("Tuesday" not in result)
