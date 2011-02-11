@@ -2,7 +2,7 @@ import unittest2
 
 from nose.tools import ok_
 
-from comrade.mail.mail import strip_signatures
+from comrade.mail.mail import strip_signatures, strip_quoted
 
 class SignatureStripTest(unittest2.TestCase):
     def setUp(self):
@@ -13,7 +13,7 @@ class SignatureStripTest(unittest2.TestCase):
 
     def _check_for_signature(self, signature):
         result = strip_signatures(self.prefix + signature + self.postfix)
-        ok_(result.startswith(self.prefix))
+        ok_(result.startswith(self.prefix[0:-1]))
         ok_(self.postfix not in result)
         ok_(signature not in result)
 
@@ -28,18 +28,6 @@ class SignatureStripTest(unittest2.TestCase):
     def test_standard_missing_space_signature(self):
         self._check_for_signature("--\n")
 
-    def test_outlook(self):
-        self._check_for_signature("-----Original Message-----")
-
-    def test_outlook_alternative(self):
-        self._check_for_signature("________________________________")
-
-    def test_mail_app(self):
-        self._check_for_signature("On Tuesday Sue wrote:\n")
-
-    def test_failsafe(self):
-        self._check_for_signature("From: Bob")
-
     def test_iphone(self):
         self._check_for_signature("Sent from my iPhone")
 
@@ -48,3 +36,32 @@ class SignatureStripTest(unittest2.TestCase):
 
     def test_from_my_anything(self):
         self._check_for_signature("Sent from my super cool phone")
+
+
+class QuotedStripTest(unittest2.TestCase):
+    def setUp(self):
+        self.prefix = """This is the message.\nIt is on multiple
+                 lines.\n\nFoo.\n"""
+        self.postfix = """\nThis is the content after the signature.\nIt should
+                not be in the final result.\n"""
+
+    def _check_for_quoted(self, quoted):
+        result = strip_quoted(self.prefix + quoted + self.postfix)
+        ok_(result.startswith(self.prefix[0:-1]))
+        ok_(self.postfix not in result)
+        ok_(quoted not in result)
+
+    def test_outlook(self):
+        self._check_for_quoted("-----Original Message-----")
+
+    def test_outlook_alternative(self):
+        self._check_for_quoted("________________________________")
+
+    def test_mail_app(self):
+        self._check_for_quoted("On Tuesday Sue wrote:\n")
+
+    def test_failsafe(self):
+        self._check_for_quoted("From: Bob")
+
+    def test_multiple(self):
+        self._check_for_quoted("On Tuesday Sue wrote:\n> Something\n")

@@ -32,9 +32,9 @@ def direct_to_email(template, recipient_list, extra_context=None,
 # http://stackoverflow.com/questions/1372694/strip-signatures-and-replies-from-emails/2193937#2193937
 EMAIL_SIGNATURES = (
         # standard
-        re.compile(r'^-- \n$', flags=re.MULTILINE), 
+        re.compile(r'^-- \n$', flags=re.MULTILINE),
         # standard missing space
-        re.compile(r'^--\n$', flags=re.MULTILINE), 
+        re.compile(r'^--\n$', flags=re.MULTILINE),
         # ego-booster
         re.compile(r'^Sent from my', flags=re.MULTILINE),
 )
@@ -52,7 +52,7 @@ EMAIL_QUOTED_MARKERS = (
         # outlook alternative
         re.compile(r'^________________________________', flags=re.MULTILINE),
         # mail.app
-        re.compile(r'^On .+ wrote:\n$', flags=re.MULTILINE),
+        re.compile(r'^On .+ wrote:\n', flags=re.MULTILINE),
         # failsafe
         re.compile(r'^From: ', flags=re.MULTILINE),
         # indented
