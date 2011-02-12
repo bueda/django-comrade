@@ -47,6 +47,10 @@ USE_SYSLOG = DEPLOYMENT != DeploymentType.SOLO
 if DEPLOYMENT != DeploymentType.SOLO:
     SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
+# CSRF Protection
+
+CSRF_FAILURE_VIEW = 'comrade.views.simple.csrf_failure'
+
 # Cache Backend
 
 CACHE_TIMEOUT = 60
@@ -87,12 +91,3 @@ if DEPLOYMENT != DeploymentType.SOLO:
 ROOT_URLCONF = 'urls'
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
-DEVSERVER_MODULES = (
-    'devserver.modules.sql.SQLRealTimeModule',
-    'devserver.modules.sql.SQLSummaryModule',
-    'devserver.modules.profile.ProfileSummaryModule',
-
-    'devserver.modules.ajax.AjaxDumpModule',
-    'devserver.modules.cache.CacheSummaryModule',
-)

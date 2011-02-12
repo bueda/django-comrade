@@ -1,16 +1,24 @@
-from django.http import HttpResponse, HttpResponseServerError
+from django.http import (HttpResponse, HttpResponseServerError,
+        HttpResponseForbidden)
 from django.template import RequestContext, loader
 from django.conf import settings
 
 import logging
 logger = logging.getLogger(__name__)
 
+def csrf_failure(request, reason='', template_name='403.html'):
+    logger.debug("CSRF failure: %s", reason)
+    t = loader.get_template(template_name)
+    context = {'message': "Do you have cookies enabled? This site requires "
+            "cookies to operate."}
+    return HttpResponseForbidden(t.render(RequestContext(request, context)))
+
 def status(request, **kwargs):
     logger.debug("Responding to status check")
     return HttpResponse()
 
 def server_error(request, template_name='500.html'):
-    t = loader.get_template(template_name) 
+    t = loader.get_template(template_name)
     return HttpResponseServerError(t.render(RequestContext(request)))
 
 def maintenance_mode(request, template_name='503.html'):
