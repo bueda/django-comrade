@@ -16,7 +16,7 @@ def direct_to_email(template, recipient_list, extra_context=None,
     """
     extra_context = extra_context or {}
     context = Context(extra_context)
-    context['site'] = Site.objects.get_current()
+    context['current_site'] = Site.objects.get_current()
     if not subject_template:
         subject = render_to_string(
                 '%s_subject.txt' % template, context).strip('\n')
