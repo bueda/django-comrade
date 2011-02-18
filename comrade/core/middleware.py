@@ -114,7 +114,8 @@ class PermissionRedirectMiddleware(object):
             if 'json' in request.accepted_types[0]:
                 return HttpResponse(status=401)
             elif request.user.is_authenticated():
-                return direct_to_template(request, "403.html", status=403)
+                return direct_to_template(request, "403.html",
+                        {'message': exception.message}, status=403)
             else:
                 return redirect_to_login(request.path)
 
