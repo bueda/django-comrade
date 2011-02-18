@@ -196,6 +196,12 @@ class HybridFormMixin(HybridEditMixin, FormMixin):
         return self.render_to_response(self.get_context_data(form=form),
                 status=400)
 
+    def get_form_kwargs(self):
+        kwargs = super(HybridFormMixin, self).get_form_kwargs()
+        if self.request.method in ('POST', 'PUT'):
+            kwargs['data'] = self.request.data
+        return kwargs
+
 
 class HybridModelFormMixin(HybridFormMixin, ModelFormMixin):
     def form_valid(self, form):
@@ -219,6 +225,15 @@ class RelatedObjectCreateMixin(HybridFormMixin, ProcessFormView):
     related_model = None
     context_form_name = None
 
+    def get_form_kwargs(self):
+        """
+        Returns the keyword arguments for instanciating the form.
+        """
+        kwargs = super(RelatedObjectCreateMixin, self).get_form_kwargs()
+        self.related_object = self.get_related_object()
+        kwargs.update({'instance': self.related_object})
+        return kwargs
+
     def get_context_form_name(self):
         if self.context_form_name:
             return self.context_form_name
@@ -231,9 +246,13 @@ class RelatedObjectCreateMixin(HybridFormMixin, ProcessFormView):
                 **{self.get_context_form_name(): form,
                     'object_list': self.object_list}), status=400)
 
+    def form_valid(self, form):
+        self.related_object = form.save()
+        return super(RelatedObjectCreateMixin, self).form_valid(form)
+
     def get_success_url(self):
         """Return the URL of the parent object."""
-        return getattr(self.object, self.related_attribute).get_absolute_url()
+        return self.related_object.get_absolute_url()
 
 
 class ModelPermissionCheckMixin(object):
@@ -249,9 +268,8 @@ class ModelPermissionCheckMixin(object):
                 self.permission_methods[http_method or self.request.method])
 
     def get_object(self):
-        if not getattr(self, 'object', None) or not self.object:
-            self.object = super(ModelPermissionCheckMixin, self).get_object()
-            if not self.get_permission_function()(self.request.user,
-                    request=self.request):
-                raise PermissionDenied
+        self.object = super(ModelPermissionCheckMixin, self).get_object()
+        if not self.get_permission_function()(self.request.user,
+                request=self.request):
+            raise PermissionDenied
         return self.object
