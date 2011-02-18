@@ -1,15 +1,13 @@
 from django.http import HttpResponse, Http404
 from django.shortcuts import redirect
-from django.core import serializers
 from django.core.exceptions import (PermissionDenied, ValidationError,
         ObjectDoesNotExist)
 from django.views.generic.list import (BaseListView,
         MultipleObjectTemplateResponseMixin)
-from django.views.generic.edit import (BaseFormView, BaseCreateView, FormMixin,
-        ModelFormMixin, ProcessFormView, BaseDeleteView, DeletionMixin,
-        UpdateView)
+from django.views.generic.edit import (FormMixin, ModelFormMixin,
+        ProcessFormView, UpdateView)
 from django.views.generic.detail import (BaseDetailView,
-        SingleObjectTemplateResponseMixin, SingleObjectMixin)
+        SingleObjectTemplateResponseMixin)
 
 from comrade.utils import extract
 
@@ -136,7 +134,7 @@ class PKSafeSingleObjectMixin(object):
 
         try:
             obj = queryset.get()
-        except ObjectDoesNotExist, ValidationError:
+        except (ObjectDoesNotExist, ValidationError):
             raise Http404(u"No %s found matching the query" %
                           (queryset.model._meta.verbose_name))
         return obj
