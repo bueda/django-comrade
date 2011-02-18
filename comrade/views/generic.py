@@ -204,21 +204,9 @@ class HybridModelFormMixin(HybridFormMixin, ModelFormMixin):
         self.object = form.save()
         return super(HybridModelFormMixin, self).form_valid(form)
 
-    def get_instance(self):
-        return self.get_object()
-
-    def get_form(self, form_class):
-        # TODO this might screw up the object instance when re-rendering because
-        # of a form validation error
-        # TODO this can probably be moved to get_form_kwargs
-        if self.request.method in ('POST', 'PUT'):
-            return form_class(data=self.request.data,
-                files=self.request.FILES,
-                initial=self.get_initial(),
-                instance=self.get_instance(),)
-        else:
-            return form_class(initial=self.get_initial(),
-                    instance=self.get_instance())
+    def get_form_kwargs(self):
+        self.object = self.get_object()
+        return super(HybridModelFormMixin, self).get_form_kwargs()
 
 
 class HybridUpdateView(PKSafeSingleObjectMixin, HybridModelFormMixin,
