@@ -2,6 +2,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import redirect
 from django.core.exceptions import (PermissionDenied, ValidationError,
         ObjectDoesNotExist)
+from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.list import (BaseListView,
         MultipleObjectTemplateResponseMixin)
 from django.views.generic.edit import (FormMixin, ModelFormMixin,
@@ -27,6 +28,22 @@ else:
             piston.emitters.JSONEmitter, 'application/json; charset=utf-8')
 
 
+class PartialTemplateResponseMixin(TemplateResponseMixin):
+    partial_template_name = None
+
+    def _render_partial(self):
+        return (self.request.is_ajax() and
+                'text/html' in self.request.accepted_types)
+
+    def get_template_names(self):
+        if self._render_partial():
+            if self.partial_template_name is None:
+                return []
+            else:
+                return [self.partial_template_name]
+        return super(PartialTemplateResponseMixin, self).get_template_names()
+    
+
 class ContentNegotiationMixin(object):
     """Requires the AcceptMiddleware to be enabled."""
 
@@ -50,8 +67,6 @@ class ContentNegotiationMixin(object):
             return context.keys()
 
     def get_minimal_context(self, context):
-        # TODO this does some extra work if we we want to include all keys -
-        # essentially rebuilds the same dict
         return extract(context, self.get_minimal_context_keys(context))
 
     def get_api_context_data(self, context):
@@ -60,8 +75,6 @@ class ContentNegotiationMixin(object):
     def get_api_response(self, context, **kwargs):
         """If the HttpRequest has something besides text/html in its ACCEPT
         header, try and serialize the context and return an HttpResponse.
-
-        This also responds to a ?format=x query parameter.
 
         Uses Piston's Emitter utility, so Piston is a requirement for now.
         """
@@ -141,7 +154,8 @@ class PKSafeSingleObjectMixin(object):
 
 
 class HybridDetailView(PKSafeSingleObjectMixin, ContentNegotiationMixin,
-        SingleObjectTemplateResponseMixin, BaseDetailView):
+        SingleObjectTemplateResponseMixin, PartialTemplateResponseMixin,
+        BaseDetailView):
     """Return an object detail view, either HTML, JSON or XML (depending on the
     ACCEPT HTTP header or ?format=x query parameter.
     """
@@ -169,17 +183,16 @@ class HybridListView(PKSafeSingleObjectMixin, ContentNegotiationMixin,
         return response
 
 
-class HybridEditMixin(object):
+class HybridEditMixin(ContentNegotiationMixin):
+    """Requires the AcceptMiddleware."""
     def get_success_response(self, form=None):
         content_type = self.request.META.get('CONTENT_TYPE', '')
-        accept_type = self.request.META.get('HTTP_ACCEPT', '')
         # TODO expand this to include XML when neccessary. Can't just look for
         # *not* text/html because IE will send '*/*' for HTTP_ACCEPT in
         # everything after the first request for a session.
-        api_call = ('text/html' not in accept_type and
-                'application/json' in accept_type or 'application/json'
-                    in content_type)
-        if api_call:
+        if ('text/html' not in self.request.accepted_types and
+                'application/json' in self.request.accepted_types or
+                'application/json' in content_type):
             if self.request.method == "POST":
                 return HttpResponse(status=201)
             else:
