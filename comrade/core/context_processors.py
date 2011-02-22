@@ -17,6 +17,12 @@ def default(request):
             context['current_site'].domain)
     return context
 
+def profile(request):
+    context = {}
+    if request.user.is_authenticated():
+        context['profile'] = request.user.get_profile()
+    return context
+
 def ssl_media(request):
     if request.is_secure():
         ssl_media_url = settings.MEDIA_URL.replace('http://','https://')
