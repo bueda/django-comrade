@@ -3,8 +3,8 @@ from django.http import (HttpResponse, HttpResponseServerError,
 from django.template import RequestContext, loader
 from django.conf import settings
 
-import logging
-logger = logging.getLogger(__name__)
+import commonware.log
+logger = commonware.log.getLogger(__name__)
 
 def csrf_failure(request, reason='', template_name='403.html'):
     logger.debug("CSRF failure: %s", reason)

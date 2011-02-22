@@ -20,8 +20,8 @@ except ImportError:
 from comrade.http import coerce_put_post
 from comrade.views.simple import direct_to_template
 
-import logging
-logger = logging.getLogger(__name__)
+import commonware.log
+logger = commonware.log.getLogger(__name__)
 
 
 _HTML_TYPES = ('text/html', 'application/xhtml+xml')

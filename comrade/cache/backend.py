@@ -12,8 +12,8 @@ from django.core.cache import cache
 from django.utils.http import urlquote
 import hashlib
 
-import logging
-logger = logging.getLogger(__name__)
+import commonware.log
+logger = commonware.log.getLogger(__name__)
 
 MAX_KEY_LENGTH = 250
 
