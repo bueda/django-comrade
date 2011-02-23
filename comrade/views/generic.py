@@ -207,12 +207,13 @@ class HybridModelFormMixin(HybridFormMixin, ModelFormMixin):
     def get_instance(self):
         return self.get_object()
 
-    def get_form(self, form_class):
+    def get_form(self, form_class, data=None):
         # TODO this might screw up the object instance when re-rendering because
         # of a form validation error
         # TODO this can probably be moved to get_form_kwargs
         if self.request.method in ('POST', 'PUT'):
-            return form_class(data=self.request.data,
+            data = data or self.request.data
+            return form_class(data=data,
                 files=self.request.FILES,
                 initial=self.get_initial(),
                 instance=self.get_instance(),)
