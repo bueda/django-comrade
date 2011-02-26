@@ -221,20 +221,12 @@ class HybridModelFormMixin(HybridFormMixin, ModelFormMixin):
         self.object = form.save()
         return super(HybridModelFormMixin, self).form_valid(form)
 
-    def get_form(self, form_class, data=None):
-        if self.request.method in ('POST', 'PUT'):
-            data = data or self.request.data
-            return form_class(data=data,
-                files=self.request.FILES,
-                initial=self.get_initial(),
-                instance=self.get_instance(),)
-        else:
-            return form_class(initial=self.get_initial(),
-                    instance=self.get_instance())
-
-    def get_form_kwargs(self):
+    def get_form_kwargs(self, data=None):
         self.object = self.get_object()
-        return super(HybridModelFormMixin, self).get_form_kwargs()
+        kwargs = super(HybridModelFormMixin, self).get_form_kwargs()
+        if self.request.method in ('POST', 'PUT'):
+            kwargs['data'] = data or self.request.data
+        return kwargs
 
 
 class HybridUpdateView(PKSafeSingleObjectMixin, HybridModelFormMixin,
