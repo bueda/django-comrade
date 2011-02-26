@@ -68,10 +68,12 @@ class BaseTest(test.TestCase):
                 target_status_code, msg_prefix)
 
     def assertDelivered(self, *args, **kwargs):
-        return delivered(*args, **kwargs)
+        result = delivered(*args, **kwargs)
+        ok_(result)
 
     def assertNotDelivered(self, *args, **kwargs):
-        return not self.assertDelivered(*args, **kwargs)
+        result = delivered(*args, **kwargs)
+        ok_(not result)
 
 
 class BaseModelTest(BaseTest):
