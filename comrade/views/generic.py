@@ -209,10 +209,10 @@ class HybridFormMixin(HybridEditMixin, FormMixin):
         return self.render_to_response(self.get_context_data(form=form),
                 status=400)
 
-    def get_form_kwargs(self):
+    def get_form_kwargs(self, data=None):
         kwargs = super(HybridFormMixin, self).get_form_kwargs()
         if self.request.method in ('POST', 'PUT'):
-            kwargs['data'] = self.request.data
+            kwargs['data'] = data or self.request.data
         return kwargs
 
 
@@ -223,10 +223,7 @@ class HybridModelFormMixin(HybridFormMixin, ModelFormMixin):
 
     def get_form_kwargs(self, data=None):
         self.object = self.get_object()
-        kwargs = super(HybridModelFormMixin, self).get_form_kwargs()
-        if self.request.method in ('POST', 'PUT'):
-            kwargs['data'] = data or self.request.data
-        return kwargs
+        return super(HybridModelFormMixin, self).get_form_kwargs()
 
 
 class HybridUpdateView(PKSafeSingleObjectMixin, HybridModelFormMixin,
