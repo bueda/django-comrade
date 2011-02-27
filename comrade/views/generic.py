@@ -28,12 +28,14 @@ else:
             piston.emitters.JSONEmitter, 'application/json; charset=utf-8')
 
 
-class PartialTemplateResponseMixin(TemplateResponseMixin):
-    partial_template_name = None
-
+class PartialMixin(object):
     def _render_partial(self):
         return (self.request.is_ajax() and
                 'text/html' in self.request.accepted_types)
+
+
+class PartialTemplateResponseMixin(TemplateResponseMixin, PartialMixin):
+    partial_template_name = None
 
     def get_template_names(self):
         if self._render_partial():
@@ -183,14 +185,19 @@ class HybridListView(PKSafeSingleObjectMixin, ContentNegotiationMixin,
         return response
 
 
-class HybridEditMixin(ContentNegotiationMixin):
+class HybridEditMixin(ContentNegotiationMixin, PartialMixin):
     """Requires the AcceptMiddleware."""
+    def get_success_response_for_partial(self):
+        return redirect(self.get_success_url())
+
     def get_success_response(self, form=None):
         content_type = self.request.META.get('CONTENT_TYPE', '')
         # TODO expand this to include XML when neccessary. Can't just look for
         # *not* text/html because IE will send '*/*' for HTTP_ACCEPT in
         # everything after the first request for a session.
-        if ('text/html' not in self.request.accepted_types and
+        if self._render_partial():
+            return self.get_success_response_for_partial()
+        elif ('text/html' not in self.request.accepted_types and
                 'application/json' in self.request.accepted_types or
                 'application/json' in content_type):
             if self.request.method == "POST":
