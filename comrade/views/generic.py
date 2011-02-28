@@ -230,7 +230,7 @@ class HybridModelFormMixin(HybridFormMixin, ModelFormMixin):
 
     def get_form_kwargs(self, data=None):
         self.object = self.get_object()
-        return super(HybridModelFormMixin, self).get_form_kwargs()
+        return HybridFormMixin.get_form_kwargs(self, data)
 
 
 class HybridUpdateView(PKSafeSingleObjectMixin, HybridModelFormMixin,
