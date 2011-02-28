@@ -10,6 +10,7 @@ from django.views.generic.edit import (FormMixin, ModelFormMixin,
 from django.views.generic.detail import (BaseDetailView,
         SingleObjectTemplateResponseMixin)
 
+from comrade.exceptions import BadRequestError
 from comrade.utils import extract
 
 try:
@@ -110,6 +111,37 @@ class ContentNegotiationMixin(object):
                 or request.accepted_types == ['*/*']):
             return []
         return request.accepted_types
+
+class BatchJSONMixin(object):
+    batch_json_key = 'list'
+
+    def get_batch_json_key(self):
+        return self.batch_json_key
+
+    def get_batch_json(self, key=None):
+        key = key or self.get_batch_json_key()
+        batch = self.request.data.get(key)
+        if not batch:
+            raise BadRequestError("Unexpected POSTed JSON format")
+        return batch
+
+    def post_json(self, request, *args, **kwargs):
+        batch = self.get_batch_json()
+        form_class = self.get_form_class()
+        form = None
+        for data in batch:
+            form = form_class(**self.get_form_kwargs(data))
+            if not form.is_valid():
+                return self.form_invalid(form)
+            form.save()
+        return self.form_valid(form)
+
+    def post(self, request, *args, **kwargs):
+        content_type = self.request.META.get('CONTENT_TYPE', '')
+        if ('application/json' in content_type
+                and self.get_batch_json_key() in request.data):
+            return self.post_json(request, *args, **kwargs)
+        return super(BatchJSONMixin, self).post(request, *args, **kwargs)
 
 
 class PKSafeSingleObjectMixin(object):
