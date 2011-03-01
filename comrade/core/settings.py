@@ -53,16 +53,25 @@ CSRF_FAILURE_VIEW = 'comrade.views.simple.csrf_failure'
 
 # Cache Backend
 
-CACHE_TIMEOUT = 60
+CACHE_TIMEOUT = 3600
 MAX_CACHE_ENTRIES = 10000
 CACHE_MIDDLEWARE_SECONDS = 3600
 CACHE_MIDDLEWARE_KEY_PREFIX = ''
 if DEPLOYMENT == DeploymentType.SOLO:
-    CACHE_BACKEND = ('locmem://?timeout=%(CACHE_TIMEOUT)d'
-            '&max_entries=%(MAX_CACHE_ENTRIES)d' % locals())
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
+        }
+    }
 else:
-    CACHE_BACKEND = ('memcached://127.0.0.1:11211/?timeout=%(CACHE_TIMEOUT)d'
-            '&max_entries=%(MAX_CACHE_ENTRIES)d' % locals())
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
+            'LOCATION': '127.0.0.1:11211',
+            'TIMEOUT': CACHE_TIMEOUT,
+            'MAX_ENTRIES': MAX_CACHE_ENTRIES
+        }
+    }
 
 DEFAULT_FROM_EMAIL = "Bueda <support@bueda.com>"
 SERVER_EMAIL = "Bueda Operations <ops@bueda.com>"
