@@ -32,7 +32,8 @@ else:
 class PartialMixin(object):
     def _render_partial(self):
         return (self.request.is_ajax() and
-                'text/html' in self.request.accepted_types)
+                'text/html' in self.request.accepted_types
+                or self.request.GET.get('format', '') == 'partial')
 
 
 class PartialTemplateResponseMixin(TemplateResponseMixin, PartialMixin):
