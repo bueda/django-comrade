@@ -32,8 +32,8 @@ else:
 class PartialMixin(object):
     def _render_partial(self):
         return (self.request.is_ajax() and
-                'text/html' in self.request.accepted_types
-                or self.request.GET.get('format', '') == 'partial')
+                ('text/html' in self.request.accepted_types
+                or self.request.GET.get('format', '') == 'partial'))
 
 
 class PartialTemplateResponseMixin(TemplateResponseMixin, PartialMixin):
@@ -46,7 +46,7 @@ class PartialTemplateResponseMixin(TemplateResponseMixin, PartialMixin):
             else:
                 return [self.partial_template_name]
         return super(PartialTemplateResponseMixin, self).get_template_names()
-    
+
 
 class ContentNegotiationMixin(object):
     """Requires the AcceptMiddleware to be enabled."""
