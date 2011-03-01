@@ -130,11 +130,12 @@ class BatchJSONMixin(object):
         form_class = self.get_form_class()
         form = None
         for data in batch:
-            form = form_class(**self.get_form_kwargs(data))
+            self.form_data = data
+            form = form_class(**self.get_form_kwargs())
             if not form.is_valid():
                 return self.form_invalid(form)
             form.save()
-        return self.form_valid(form)
+        return self.get_success_response(form)
 
     def post(self, request, *args, **kwargs):
         content_type = self.request.META.get('CONTENT_TYPE', '')
@@ -241,6 +242,8 @@ class HybridEditMixin(ContentNegotiationMixin, PartialMixin):
 
 
 class HybridFormMixin(HybridEditMixin, FormMixin):
+    form_data = None
+
     def form_valid(self, form):
         return self.get_success_response(form)
 
@@ -248,10 +251,13 @@ class HybridFormMixin(HybridEditMixin, FormMixin):
         return self.render_to_response(self.get_context_data(form=form),
                 status=400)
 
-    def get_form_kwargs(self, data=None):
+    def get_form_data(self):
+        return self.form_data or self.request.data
+
+    def get_form_kwargs(self):
         kwargs = super(HybridFormMixin, self).get_form_kwargs()
         if self.request.method in ('POST', 'PUT'):
-            kwargs['data'] = data or self.request.data
+            kwargs['data'] = self.get_form_data()
         return kwargs
 
 
@@ -260,9 +266,9 @@ class HybridModelFormMixin(HybridFormMixin, ModelFormMixin):
         self.object = form.save()
         return super(HybridModelFormMixin, self).form_valid(form)
 
-    def get_form_kwargs(self, data=None):
+    def get_form_kwargs(self):
         self.object = self.get_object()
-        return HybridFormMixin.get_form_kwargs(self, data)
+        return super(HybridModelFormMixin, self).get_form_kwargs()
 
 
 class HybridUpdateView(PKSafeSingleObjectMixin, HybridModelFormMixin,
