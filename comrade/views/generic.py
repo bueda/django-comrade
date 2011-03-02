@@ -122,7 +122,7 @@ class BatchJSONMixin(object):
     def get_batch_json(self, key=None):
         key = key or self.get_batch_json_key()
         batch = self.request.data.get(key)
-        if not batch:
+        if batch is None:
             raise BadRequestError("Unexpected POSTed JSON format")
         return batch
 
