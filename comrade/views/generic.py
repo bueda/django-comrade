@@ -204,7 +204,8 @@ class HybridDetailView(PKSafeSingleObjectMixin, ContentNegotiationMixin,
 
 
 class HybridListView(PKSafeSingleObjectMixin, ContentNegotiationMixin,
-        MultipleObjectTemplateResponseMixin, BaseListView):
+        MultipleObjectTemplateResponseMixin, PartialTemplateResponseMixin,
+        BaseListView):
     """Return an object list view, either HTML, JSON or XML (depending on the
     ACCEPT HTTP header or ?format=x query parameter.
     """
