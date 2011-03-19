@@ -47,19 +47,19 @@ class ColorizedUTF8SafeFormatter(UTF8SafeFormatter):
         if curses and sys.stderr.isatty():
             try:
                 curses.setupterm()
-                if curses.tigetnum("colors") > 0:
-                    color = True
             except:
                 pass
             else:
-                fg_color = curses.tigetstr("setaf") or curses.tigetstr("setf") or ""
-                self._colors = {
-                    logging.DEBUG: curses.tparm(fg_color, 4), # Blue
-                    logging.INFO: curses.tparm(fg_color, 2), # Green
-                    logging.WARNING: curses.tparm(fg_color, 3), # Yellow
-                    logging.ERROR: curses.tparm(fg_color, 1), # Red
-                }
-                self._normal = curses.tigetstr("sgr0")
+                if curses.tigetnum("colors") > 0:
+                    fg_color = (curses.tigetstr("setaf")
+                            or curses.tigetstr("setf") or "")
+                    self._colors = {
+                        logging.DEBUG: curses.tparm(fg_color, 4), # Blue
+                        logging.INFO: curses.tparm(fg_color, 2), # Green
+                        logging.WARNING: curses.tparm(fg_color, 3), # Yellow
+                        logging.ERROR: curses.tparm(fg_color, 1), # Red
+                    }
+                    self._normal = curses.tigetstr("sgr0")
 
     def format(self, record):
         message = UTF8SafeFormatter.format(self, record)
