@@ -52,7 +52,7 @@ EMAIL_QUOTED_MARKERS = (
         # outlook alternative
         re.compile(r'^________________________________', flags=re.MULTILINE),
         # mail.app
-        re.compile(r'^On .+ wrote:\r*\n', flags=re.MULTILINE),
+        re.compile(r'^On .+wrote:\r*\n', flags=re.MULTILINE),
         # failsafe
         re.compile(r'^From: ', flags=re.MULTILINE),
         # indented
