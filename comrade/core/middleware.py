@@ -1,7 +1,8 @@
 from django.conf import settings
+from django.middleware.csrf import CsrfViewMiddleware
 from django.http import (HttpResponsePermanentRedirect, get_host, HttpResponse,
-        HttpResponseForbidden, Http404)
-from django.core.exceptions import PermissionDenied
+        Http404)
+from django.core.exceptions import PermissionDenied, ImproperlyConfigured
 from django.contrib.auth.views import redirect_to_login
 
 import re
@@ -31,7 +32,28 @@ _FORM_RE = re.compile(r'((<form\W[^>]*\bmethod=(\'|"|))(%s)((\'|"|)\b[^>]*>))'
 _MIDDLEWARE_KEY = '_method'
 SSL = 'SSL'
 
+
 class HttpMethodsMiddleware(object):
+    """Allows you to use methods other than GET/POST in HTML forms.
+
+    This rewrites the responses to use POST and to store the actual method in a
+    hidden form input. When processing requests it looks for the intended method
+    on the from data and patches the request object.
+
+    You need to be careful with this middleware, as Django's CSRF view
+    middleware doesn't enforce a token requirement if the method is anything
+    besides POST. You MUST use the MultiMethodCsrfViewMiddleware in conjunction
+    with this middleware (and instead of Django's own CsrfViewMiddleware).
+    """
+
+    def __init__(self):
+        if ('django.middleware.csrf.CsrfViewMiddleware' in
+                settings.MIDDLEWARE_CLASSES):
+            raise ImproperlyConfigured("To use CSRF protection with the "
+                    "HttpMethodsMiddleware, you muse use the "
+                    "MultiMethodCsrfViewMiddleware instead of Django's "
+                    "CsrfViewMiddleware.")
+
     def process_request(self, request):
         if request.POST and request.POST.has_key(_MIDDLEWARE_KEY):
             if request.POST[_MIDDLEWARE_KEY].upper() in _SUPPORTED_TRANSFORMS:
@@ -57,6 +79,26 @@ class HttpMethodsMiddleware(object):
             # Modify any POST forms
             response.content = _FORM_RE.sub(add_transform_field,
                     response.content)
+        return response
+
+
+class MultiMethodCsrfViewMiddleware(CsrfViewMiddleware):
+    """To be used in conjunction with HttpMethodsMiddleware, this changes the
+    request's HTTP method back to POST if it was modified to PUT/DELETE so CSRF
+    token checking will still occur.
+
+    Seriously, don't forget to use this! The Django ticket #15258 proposes
+    expanding the CSRF protection to PUT and DELETE, but until then this is
+    neccessary.
+    """
+
+    def process_view(self, request, callback, callback_args, callback_kwargs):
+        original_method = request.method
+        if request.method not in ('GET', 'HEAD', 'OPTIONS'):
+            request.method = 'POST'
+        response = super(MultiMethodCsrfViewMiddleware, self).process_view(
+                request, callback, callback_args, callback_kwargs)
+        request.method = original_method
         return response
 
 
