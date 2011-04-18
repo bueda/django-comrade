@@ -10,6 +10,8 @@ from django.views.generic.edit import (FormMixin, ModelFormMixin,
 from django.views.generic.detail import (BaseDetailView,
         SingleObjectTemplateResponseMixin)
 
+import json
+
 from comrade.exceptions import BadRequestError
 from comrade.utils import extract
 
@@ -236,9 +238,13 @@ class HybridEditMixin(ContentNegotiationMixin, PartialMixin):
                 'application/json' in self.request.accepted_types or
                 'application/json' in content_type):
             if self.request.method == "POST":
-                return HttpResponse(status=201)
+                status = 201
             else:
-                return HttpResponse(status=200)
+                status = 200
+            return HttpResponse(
+                    json.dumps({'redirect': self.get_success_url()}),
+                    content_type='application/json',
+                    status=status)
         else:
             return redirect(self.get_success_url())
 
