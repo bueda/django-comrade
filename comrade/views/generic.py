@@ -169,6 +169,9 @@ class PKSafeSingleObjectMixin(object):
             pk = self.kwargs.get(queryset.model.__name__.lower() + '_pk', None)
         pk = queryset.model._meta.pk.to_python(pk)
         slug = self.kwargs.get('slug', None)
+        if slug is None:
+            slug = self.kwargs.get(queryset.model.__name__.lower() + '_slug',
+                    None)
         if pk is not None:
             queryset = queryset.filter(pk=pk)
 
