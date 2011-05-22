@@ -103,6 +103,13 @@ class ContentNegotiationMixin(object):
                 except piston.utils.HttpStatusCode, e:
                     return e.response
 
+    def render_to_response(self, context, **kwargs):
+        response = self.get_api_response(context, **kwargs)
+        if not response:
+            response = super(ContentNegotiationMixin, self
+                    ).render_to_response(context, **kwargs)
+        return response
+
     def _determine_accepted_types(self, request):
         """
         Assume this request will accept HTML if it either explicitly requests
