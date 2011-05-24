@@ -1,6 +1,5 @@
 from django import test
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.cache import cache
 
@@ -26,6 +25,9 @@ class BaseTest(test.TestCase):
         return self.client.login(username=(
                     getattr(self, 'user', None) and self.user.username) or 'test',
                 password=password or 'test')
+
+    def logout(self):
+        self.client.logout()
 
     def _test_unauthenticated(self, method, url, next_url=None, allowed=False):
         self.client.logout()
