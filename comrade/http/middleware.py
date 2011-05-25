@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.middleware.csrf import CsrfViewMiddleware
-from django.http import (HttpResponsePermanentRedirect, get_host, HttpResponse,
-        Http404)
+from django.http import HttpResponsePermanentRedirect, get_host, HttpResponse
 from django.core.exceptions import PermissionDenied, ImproperlyConfigured
 from django.contrib.auth.views import redirect_to_login
 

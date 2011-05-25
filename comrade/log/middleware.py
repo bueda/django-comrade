@@ -1,3 +1,5 @@
+from django.http import Http404
+
 import commonware.log
 logger = commonware.log.getLogger(__name__)
 
