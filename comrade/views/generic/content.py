@@ -18,8 +18,21 @@ else:
     piston.emitters.Emitter.register('application/json',
             piston.emitters.JSONEmitter, 'application/json; charset=utf-8')
 
+
 class ContentNegotiationMixin(object):
-    """Requires the AcceptMiddleware to be enabled."""
+    """Return either HTML or an API response based on the request headers.
+
+    This mixin checks the Accept header, and if it's anything besides text/html,
+    tries to serialize the context return from the view to the requested format
+    (using Piston's serializers).
+
+    The set of context keys to include/exclude can be controlled either by
+    changing the api_context_exclude_keys/api_context_include_keys class
+    variables or overriding the get_minimal_context() method.
+
+    Requires the AcceptMiddleware to be enabled.
+
+    """
 
     api_context_include_keys = set()
     api_context_exclude_keys = set()
@@ -32,6 +45,7 @@ class ContentNegotiationMixin(object):
         """Returns keys in this order if they are defined: include_keys,
         exclude_keys, original keys. Currently there is no way to use both
         include and exclude.
+
         """
         if self.api_context_include_keys:
             return self.api_context_include_keys
@@ -41,6 +55,7 @@ class ContentNegotiationMixin(object):
             return context.keys()
 
     def get_minimal_context(self, context):
+        """Return a subset of the context suitable for an API response."""
         return extract(context, self.get_minimal_context_keys(context))
 
     def get_api_context_data(self, context):
@@ -51,6 +66,7 @@ class ContentNegotiationMixin(object):
         header, try and serialize the context and return an HttpResponse.
 
         Uses Piston's Emitter utility, so Piston is a requirement for now.
+
         """
         accepted_types = self._determine_accepted_types(self.request)
         for accepted_type in accepted_types:
@@ -79,10 +95,9 @@ class ContentNegotiationMixin(object):
         return response
 
     def _determine_accepted_types(self, request):
-        """
-        Assume this request will accept HTML if it either explicitly requests
-        it, or if it's IE and it's just giving us '*/*' as this isn't the
-        first request of the session.
+        """Assume this request will accept HTML if it either explicitly requests
+        it, or if it's IE and it's just giving us '*/*' as this isn't the first
+        request of the session.
 
         """
         if ("text/html" in request.accepted_types
@@ -90,7 +105,29 @@ class ContentNegotiationMixin(object):
             return []
         return request.accepted_types
 
+
 class BatchJSONMixin(object):
+    """Mix this in with one of the generic form views to allow multiple instance
+    to be created by POSTing a JSON list of the data for the instances.
+
+    The JSON key is specified by the batch_json_key class variable, or by the
+    get_batch_json_key() method.
+
+    Consider a view that accepts data for a new User object, and it expects a
+    'email' and 'username' values. Mix in this class, then POST it JSON like so:
+
+        {'list': [
+            {'email': "first_email@example.com",
+                'username': "first_username"},
+            {'email': "second_email@example.com",
+                'username': "second_username"}
+            ]
+        }
+
+    Two users will be created, the same as if two separate HTTP requests were
+    made.
+
+    """
     batch_json_key = 'list'
 
     def get_batch_json_key(self):
