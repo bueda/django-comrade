@@ -3,9 +3,16 @@ Django Caching Framework wrapper.
 
 Christopher Peplin, peplin@bueda.com
 
-Use these functions instead of directly acessing django.core.cache
-and your cache activity will be logged, and keys will be made Memcached-safe
-with urlquote.
+Instead of:
+
+    from django.core.cache import cache
+
+use the Comrade version:
+
+    from comrade.cache import cache
+
+This gives you logging of all cache activity (hits, misses, etc), and keys will
+be made memcached-safe with urlquote.
 """
 
 from django.core.cache import cache
