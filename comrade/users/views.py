@@ -2,11 +2,11 @@ from django.conf import settings
 from django.contrib.auth import login as auth_login, REDIRECT_FIELD_NAME
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from django.contrib.auth.forms import AuthenticationForm
 
 import re
 
 from comrade.users import multipass
-from comrade.users.forms import LongAuthenticationForm
 from comrade.views.simple import direct_to_template
 
 import commonware.log
@@ -19,7 +19,7 @@ def _add_sso(request, use_multipass, tender_url, redirect_to):
 
 def login(request, multipass=False, template_name='registration/login.html',
           redirect_field_name=REDIRECT_FIELD_NAME,
-          authentication_form=LongAuthenticationForm):
+          authentication_form=AuthenticationForm):
     """Displays the login form and handles the login action."""
 
     redirect_to = request.REQUEST.get(redirect_field_name, '')
@@ -27,8 +27,8 @@ def login(request, multipass=False, template_name='registration/login.html',
     tender_url = getattr(settings, 'TENDER_URL', None)
     if not redirect_to or ' ' in redirect_to:
         redirect_to = settings.LOGIN_REDIRECT_URL
-    # Heavier security check -- redirects to http://example.com should 
-    # not be allowed, but things like /view/?param=http://example.com 
+    # Heavier security check -- redirects to http://example.com should
+    # not be allowed, but things like /view/?param=http://example.com
     # should be allowed. This regex checks if there is a '//' *before* a
     # question mark. Unless of course, the redirect is to the Tender
     # app.
@@ -55,7 +55,7 @@ def login(request, multipass=False, template_name='registration/login.html',
         login_url = reverse('account:multipass_login')
     else:
         login_url = reverse('account:login')
-    
+
     request.session.set_test_cookie()
     return direct_to_template(request, template_name, {
         'form': form,
