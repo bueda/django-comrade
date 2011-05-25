@@ -125,24 +125,6 @@ class SslRedirectMiddleware(object):
         return HttpResponsePermanentRedirect(url)
 
 
-class ArgumentLogMiddleware(object):
-    ignored_modules = ['debug_toolbar.views',
-            'django.views.static',
-            'django.contrib.staticfiles.views']
-
-    def process_view(self, request, view, args, kwargs):
-        if hasattr(view, '__name__'):
-            name = view.__name__
-        elif hasattr(view, '__class__'):
-            name = view.__class__
-        else:
-            name = ''
-        if view.__module__ not in self.ignored_modules:
-            logger.debug('Calling %s.%s' % (view.__module__, name))
-            if kwargs or args:
-                logger.debug('Arguments: %s' % (kwargs or (args,)))
-
-
 class PermissionRedirectMiddleware(object):
     """Middleware that catches any PermissionDenied errors that haven't been
     caught in the view and redirects the user to the login page. This allows any helper
@@ -160,12 +142,6 @@ class PermissionRedirectMiddleware(object):
                         {'message': str(exception)}, status=403)
             else:
                 return redirect_to_login(request.path)
-
-
-class ExceptionLoggingMiddlware(object):
-    def process_exception(self, request, exception):
-        if not isinstance(exception, Http404):
-            logger.exception("Unhandled exception:")
 
 
 class POSTDataMassageMiddleware(object):
