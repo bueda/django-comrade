@@ -1,7 +1,7 @@
-from nose.tools import ok_, eq_
+from nose.tools import ok_
 import unittest
 
-import models
+from db.models import ComradeBaseModel
 
 def check_direct_to_template(prefix, pattern):
     from django import test
@@ -16,7 +16,7 @@ def check_direct_to_template(prefix, pattern):
         " the response. Actual template(s) used: %s" %
             (template_name, u', '.join(template_names)))
 
-class SimpleModel(models.ComradeBaseModel):
+class SimpleModel(ComradeBaseModel):
     def __unicode__(self):
         return u'This is a unicode string'
 
