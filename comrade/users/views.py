@@ -1,21 +1,20 @@
 from django.conf import settings
 from django.contrib.auth import login as auth_login, REDIRECT_FIELD_NAME
-from django.contrib.auth.forms import AuthenticationForm
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 
 import re
 
-from comrade.users import utils
+from comrade.users import multipass
 from comrade.users.forms import LongAuthenticationForm
 from comrade.views.simple import direct_to_template
 
 import commonware.log
 logger = commonware.log.getLogger(__name__)
 
-def _add_sso(request, multipass, tender_url, redirect_to):
-    if multipass and redirect_to == tender_url:
-            redirect_to += '?sso=' + utils.multipass(request.user)
+def _add_sso(request, use_multipass, tender_url, redirect_to):
+    if use_multipass and redirect_to == tender_url:
+            redirect_to += '?sso=' + multipass.multipass(request.user)
     return redirect_to
 
 def login(request, multipass=False, template_name='registration/login.html',
