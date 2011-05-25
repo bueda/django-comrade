@@ -69,6 +69,17 @@ class HybridDetailView(PKSafeSingleObjectMixin, ContentNegotiationMixin,
 
 
 class ModelPermissionCheckMixin(object):
+    """Call a boolean method on the retreived object to check if the requesting
+    user has sufficient permissions.
+
+    By default, expects some standard "can_view" and "can_edit" methods to
+    exists, and selects the method based on the HTTP verb requested. This can be
+    customized by overriding the get_permission_function() method. The method
+    selected should accept the user and request object (as an optional
+    argument).
+
+    """
+
     permission_methods = {
         'GET': 'can_view',
         'POST': 'can_edit',
