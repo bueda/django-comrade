@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from settings import DeploymentType
 
+
 def default(request):
     context = {}
     context['DEPLOYMENT'] = settings.DEPLOYMENT
@@ -23,11 +24,3 @@ def profile(request):
     if request.user.is_authenticated():
         context['profile'] = lambda: request.user.get_profile()
     return context
-
-
-def ssl_media(request):
-    if request.is_secure():
-        ssl_media_url = settings.MEDIA_URL.replace('http://','https://')
-    else:
-        ssl_media_url = settings.MEDIA_URL
-    return {'MEDIA_URL': ssl_media_url}
