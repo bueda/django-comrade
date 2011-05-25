@@ -2,7 +2,7 @@ import unittest2
 
 from nose.tools import ok_
 
-from comrade.mail.mail import strip_signatures, strip_quoted
+from filters import strip_signatures, strip_quoted
 
 class SignatureStripTest(unittest2.TestCase):
     def setUp(self):
